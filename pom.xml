@@ -5,6 +5,11 @@
 	<artifactId>moduli</artifactId>
 	<version>1.0</version>
 	<name>Moduli</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
 	<dependencies>
 		<dependency>
 			<groupId>commons-configuration</groupId>
@@ -90,4 +95,17 @@
 			</build>
 		</profile>
 	</profiles>
+
+  <distributionManagement>
+    <repository>
+      <id>tigers</id>
+      <name>Internal Releases</name>
+      <url>https://tigers-mannheim.de/nexus/content/repositories/tigers</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshot_tigers</id>
+      <name>Internal Releases</name>
+      <url>https://tigers-mannheim.de/nexus/content/repositories/snapshot_tigers</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
