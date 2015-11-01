@@ -42,19 +42,19 @@ public class Moduli
 	
 	// --- global configuration ---
 	private SubnodeConfiguration		globalConfiguration;
-	
+												
 	// --- logger ---
 	private static final Logger		log					= Logger.getLogger(Moduli.class.getName());
-	
+																		
 	// --- moduleList ---
 	private final ArrayList<AModule>	moduleList			= new ArrayList<AModule>();
-	
+																		
 	// --- module-state-variable ---
 	private ModulesStateVariable		modulesState		= new ModulesStateVariable();
-	
+																		
 	private static final Class<?>[]	PROP_ARGS_CLASS	= new Class[] { SubnodeConfiguration.class };
-	
-	
+																		
+																		
 	// --------------------------------------------------------------------------
 	// --- setter/getter --------------------------------------------------------
 	// --------------------------------------------------------------------------
@@ -121,6 +121,10 @@ public class Moduli
 			
 			// --- set moduli-folder ---
 			String implsPath = config.getString("moduliPath");
+			if (!implsPath.isEmpty())
+			{
+				implsPath += ".";
+			}
 			
 			// --- set globalConfiguration ---
 			globalConfiguration = config.configurationAt("globalConfiguration");
@@ -130,7 +134,7 @@ public class Moduli
 			{
 				
 				// --- create implementation- and properties-class ---
-				Class<?> clazz = Class.forName(implsPath + "." + config.getString("module(" + i + ").implementation"));
+				Class<?> clazz = Class.forName(implsPath + config.getString("module(" + i + ").implementation"));
 				
 				// --- get properties from configuration and put it into a object[] ---
 				SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
@@ -184,7 +188,8 @@ public class Moduli
 		{
 			throw new LoadModulesException(
 					"Can't find a constructor <init>(SubnodeConfiguration) of this class. Please add one. : "
-							+ e.getMessage(), e);
+							+ e.getMessage(),
+					e);
 		} catch (IllegalArgumentException e)
 		{
 			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
