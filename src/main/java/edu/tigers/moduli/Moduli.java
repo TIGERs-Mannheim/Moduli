@@ -34,10 +34,10 @@ public class Moduli
 	private SubnodeConfiguration		globalConfiguration;
 												
 	private static final Logger		log					= Logger.getLogger(Moduli.class.getName());
-																		
-	private final ArrayList<AModule>	moduleList			= new ArrayList<AModule>();
-																		
-	private ModulesStateVariable		modulesState		= new ModulesStateVariable();
+
+	private final ArrayList<AModule> moduleList = new ArrayList<>();
+
+	private ModulesStateVariable modulesState = new ModulesStateVariable();
 																		
 	private static final Class<?>[]	PROP_ARGS_CLASS	= new Class[] { SubnodeConfiguration.class };
 																		
@@ -88,50 +88,56 @@ public class Moduli
 		moduleList.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
-		
-		// --- fill it with new modules ---
-		try
-		{
+		fillItWithNewModules(xmlFile);
+
+
+		checkDependencies();
+
+		modulesState.set(ModulesState.RESOLVED);
+	}
+
+	private void fillItWithNewModules(String xmlFile) throws LoadModulesException {
+		try {
 			XMLConfiguration config;
-			
+
 			config = new XMLConfiguration(xmlFile);
-			
+
 			// --- set moduli-folder ---
 			String implsPath = config.getString("moduliPath");
 			if (!implsPath.isEmpty())
 			{
 				implsPath += ".";
 			}
-			
+
 			// --- set globalConfiguration ---
 			globalConfiguration = config.configurationAt("globalConfiguration");
-			
+
 			// --- load modules into modulesList ---
 			for (int i = 0; i <= config.getMaxIndex("module"); i++)
 			{
-				
+
 				// --- create implementation- and properties-class ---
 				Class<?> clazz = Class.forName(implsPath + config.getString("module(" + i + ").implementation"));
-				
+
 				// --- get properties from configuration and put it into a object[] ---
 				SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
 				Object[] propArgs = new Object[] { moduleConfig };
-				
+
 				// --- get constructor of implementation-class with subnodeConfiguration-parameter ---
 				Constructor<?> clazzConstructor = clazz.getConstructor(PROP_ARGS_CLASS);
-				
+
 				// --- create object (use constructor) ---
 				AModule module = (AModule) createObject(clazzConstructor, propArgs);
-				
+
 				// --- set module config ---
 				module.setSubnodeConfiguration(moduleConfig);
-				
+
 				// --- set id ---
 				module.setId(config.getString("module(" + i + ")[@id]"));
-				
+
 				// --- set type ---
 				module.setType(config.getString("module(" + i + ")[@type]"));
-				
+
 				// --- check if module is unique ---
 				for (AModule m : moduleList)
 				{
@@ -140,20 +146,19 @@ public class Moduli
 						throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
 					}
 				}
-				
+
 				// --- set dependency-list ---
 				List<String> depList = Arrays.asList(config.getStringArray("module(" + i + ").dependency"));
 				module.setDependencies(depList);
-				
-				
+
+
 				// --- put module into moduleList ---
 				moduleList.add(module);
-				
+
 				log.trace("Module created: " + module);
 			}
-			
-		} catch (ConfigurationException e)
-		{
+
+		} catch (ConfigurationException e) {
 			throw new LoadModulesException("Configuration contains errors: " + e.getMessage(), e);
 		} catch (ClassNotFoundException e)
 		{
@@ -171,15 +176,9 @@ public class Moduli
 		{
 			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
 		}
-		
-		// --- check dependencies ---
-		checkDependencies();
-		
-		// --- set state "RESOLVED" ---
-		modulesState.set(ModulesState.RESOLVED);
 	}
-	
-	
+
+
 	/**
 	 * Load modules and catch exceptions
 	 * 
@@ -208,10 +207,14 @@ public class Moduli
 	 */
 	public void startModules() throws InitModuleException, StartModuleException
 	{
-		
-		// --- init modules ---
-		for (AModule m : moduleList)
-		{
+		initModules();
+		startUpModules();
+
+		modulesState.set(ModulesState.ACTIVE);
+	}
+
+	private void initModules() throws InitModuleException {
+		for (AModule m : moduleList) {
 			try
 			{
 				log.trace("Initializing module " + m);
@@ -222,10 +225,10 @@ public class Moduli
 				throw new InitModuleException("Could not initialize module " + m, err);
 			}
 		}
-		
-		// --- start modules ---
-		for (AModule m : moduleList)
-		{
+	}
+
+	private void startUpModules() throws StartModuleException {
+		for (AModule m : moduleList) {
 			if (!m.isStartModule())
 			{
 				continue;
@@ -240,20 +243,23 @@ public class Moduli
 				throw new StartModuleException("Could not initialize module " + m, err);
 			}
 		}
-		
-		// --- set state "RESOLVED" ---
-		modulesState.set(ModulesState.ACTIVE);
 	}
-	
-	
+
+
 	/**
 	 * Stops all modules in modulesList.
 	 */
 	public void stopModules()
 	{
-		// --- stop modules ---
-		for (AModule m : moduleList)
-		{
+		internalStopModules();
+
+		deinitModules();
+
+		modulesState.set(ModulesState.RESOLVED);
+	}
+
+	private void internalStopModules() {
+		for (AModule m : moduleList) {
 			if (!m.isStartModule())
 			{
 				continue;
@@ -267,10 +273,10 @@ public class Moduli
 				log.error("Exception while stopping module: " + m, err);
 			}
 		}
-		
-		// --- deinit modules ---
-		for (AModule m : moduleList)
-		{
+	}
+
+	private void deinitModules() {
+		for (AModule m : moduleList) {
 			try
 			{
 				m.deinitModule();
@@ -280,12 +286,9 @@ public class Moduli
 				log.error("Exception while deinitializing module: " + m, err);
 			}
 		}
-		
-		// --- set state "RESOLVED" ---
-		modulesState.set(ModulesState.RESOLVED);
 	}
-	
-	
+
+
 	/**
 	 * Returns a list with all loaded modules.
 	 * 
@@ -329,8 +332,8 @@ public class Moduli
 	{
 		
 		// --- variable which indicates if dependencies are okay ---
-		boolean depOk = false;
-		
+		boolean dependenciesOk = false;
+
 		// --- check if all dependencies can be resolved ---
 		for (AModule m : moduleList)
 		{
@@ -338,21 +341,19 @@ public class Moduli
 			for (String dependency : m.getDependencies())
 			{
 				// --- reset depOk ---
-				depOk = false;
-				
-				for (AModule n : moduleList)
-				{
+				dependenciesOk = false;
+
+				for (AModule n : moduleList) {
 					if (n.getId().equals(dependency))
 					{
 						// --- dep is okay ---
-						depOk = true;
+						dependenciesOk = true;
 						break;
 					}
 				}
 				
 				// --- check if one dependencies isn't met ---
-				if (!depOk)
-				{
+				if (!dependenciesOk) {
 					throw new DependencyException("Dependency '" + dependency + "' isn't met at module '" + m.getId() + "'");
 				}
 				
