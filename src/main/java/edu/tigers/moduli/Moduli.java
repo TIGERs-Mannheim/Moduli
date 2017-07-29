@@ -10,59 +10,42 @@
 
 package edu.tigers.moduli;
 
+import edu.tigers.moduli.exceptions.*;
+import edu.tigers.moduli.listenerVariables.ModulesState;
+import edu.tigers.moduli.listenerVariables.ModulesStateVariable;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.SubnodeConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.log4j.Logger;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.SubnodeConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.log4j.Logger;
-
-import edu.tigers.moduli.exceptions.DependencyException;
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.LoadModulesException;
-import edu.tigers.moduli.exceptions.ModuleNotFoundException;
-import edu.tigers.moduli.exceptions.StartModuleException;
-import edu.tigers.moduli.listenerVariables.ModulesState;
-import edu.tigers.moduli.listenerVariables.ModulesStateVariable;
-
 
 /**
  * Main-class of moduli.
- * It contains the handeling of the modules.
+ * It contains the handling of the modules.
  */
 public class Moduli
 {
-	// --------------------------------------------------------------------------
-	// --- instance variables ---------------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	// --- global configuration ---
 	private SubnodeConfiguration		globalConfiguration;
 												
-	// --- logger ---
 	private static final Logger		log					= Logger.getLogger(Moduli.class.getName());
 																		
-	// --- moduleList ---
 	private final ArrayList<AModule>	moduleList			= new ArrayList<AModule>();
 																		
-	// --- module-state-variable ---
 	private ModulesStateVariable		modulesState		= new ModulesStateVariable();
 																		
 	private static final Class<?>[]	PROP_ARGS_CLASS	= new Class[] { SubnodeConfiguration.class };
 																		
 																		
-	// --------------------------------------------------------------------------
-	// --- setter/getter --------------------------------------------------------
-	// --------------------------------------------------------------------------
-	
 	/**
 	 * Getter modulesState.
 	 * 
-	 * @return
+	 * @return the state of the modules
 	 */
 	public ModulesStateVariable getModulesState()
 	{
@@ -74,7 +57,7 @@ public class Moduli
 	 * Setter modulesState.
 	 * Only to use if you know what you are doing ;).
 	 * 
-	 * @param modulesState
+	 * @param modulesState the new modulesState to set
 	 */
 	public void setModulesState(final ModulesStateVariable modulesState)
 	{
@@ -85,7 +68,7 @@ public class Moduli
 	/**
 	 * Getter global configuration
 	 * 
-	 * @return
+	 * @return the global configuration
 	 */
 	public SubnodeConfiguration getGlobalConfiguration()
 	{
@@ -93,23 +76,17 @@ public class Moduli
 	}
 	
 	
-	// --------------------------------------------------------------------------
-	// --- public-method(s) -----------------------------------------------------
-	// --------------------------------------------------------------------------
-	
 	/**
 	 * Loads all available modules from configuration-file into modulesList.
 	 * 
 	 * @param xmlFile (module-)configuration-file
 	 * @throws LoadModulesException an error occurs... Can't continue.
-	 * @throws DependencyException
+	 * @throws DependencyException when dependencies are not met
 	 */
 	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
 	{
-		// --- clear all moduleList ---
 		moduleList.clear();
 		
-		// --- set state "NOT_LOADED" ---
 		modulesState.set(ModulesState.NOT_LOADED);
 		
 		// --- fill it with new modules ---
@@ -206,7 +183,7 @@ public class Moduli
 	/**
 	 * Load modules and catch exceptions
 	 * 
-	 * @param filename
+	 * @param filename of the moduli config
 	 */
 	public void loadModulesSafe(final String filename)
 	{
@@ -215,11 +192,7 @@ public class Moduli
 			// --- get modules from configuration-file ---
 			loadModules(filename);
 			log.debug("Loaded config: " + filename);
-		} catch (final LoadModulesException e)
-		{
-			log.error(e.getMessage() + " (moduleConfigFile: '" + filename
-					+ "') ", e);
-		} catch (final DependencyException e)
+		} catch (final LoadModulesException | DependencyException e)
 		{
 			log.error(e.getMessage() + " (moduleConfigFile: '" + filename
 					+ "') ", e);
@@ -230,8 +203,8 @@ public class Moduli
 	/**
 	 * Starts all modules in modulesList.
 	 * 
-	 * @throws InitModuleException
-	 * @throws StartModuleException
+	 * @throws InitModuleException if the initialization of a module fails
+	 * @throws StartModuleException if the start of a module fails
 	 */
 	public void startModules() throws InitModuleException, StartModuleException
 	{
@@ -316,7 +289,7 @@ public class Moduli
 	/**
 	 * Returns a list with all loaded modules.
 	 * 
-	 * @return
+	 * @return all modules
 	 */
 	public List<AModule> getModules()
 	{
@@ -328,8 +301,8 @@ public class Moduli
 	 * Gets a module from current module-list.
 	 * 
 	 * @param moduleId module-id-string
-	 * @return
-	 * @throws ModuleNotFoundException
+	 * @throws ModuleNotFoundException if the module couldn't be found
+	 * @return the instance of the module for the id
 	 */
 	public AModule getModule(final String moduleId) throws ModuleNotFoundException
 	{
@@ -346,10 +319,6 @@ public class Moduli
 		throw new ModuleNotFoundException("Module " + moduleId + " not found");
 	}
 	
-	
-	// --------------------------------------------------------------------------
-	// --- private-method(s) ----------------------------------------------------
-	// --------------------------------------------------------------------------
 	
 	/**
 	 * Checks, if dependencies can be resolved.
@@ -398,25 +367,13 @@ public class Moduli
 	 */
 	private Object createObject(final Constructor<?> constructor, final Object[] arguments)
 	{
-		Object object = null;
-		
 		try
 		{
-			object = constructor.newInstance(arguments);
-			return object;
-		} catch (InstantiationException e)
-		{
-			log.error(e.getMessage(), e);
-		} catch (IllegalAccessException e)
-		{
-			log.error(e.getMessage(), e);
-		} catch (IllegalArgumentException e)
-		{
-			log.error(e.getMessage(), e);
-		} catch (InvocationTargetException e)
+			return constructor.newInstance(arguments);
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
 		{
 			log.error(e.getMessage(), e);
 		}
-		return object;
+		return null;
 	}
 }

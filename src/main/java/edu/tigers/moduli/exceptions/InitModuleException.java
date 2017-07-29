@@ -10,7 +10,7 @@
 package edu.tigers.moduli.exceptions;
 
 /**
- * Exception if the module-system isn't able to start the modules.
+ * Exception if the module-system isn't able to initialize the modules.
  */
 public class InitModuleException extends Exception
 {
