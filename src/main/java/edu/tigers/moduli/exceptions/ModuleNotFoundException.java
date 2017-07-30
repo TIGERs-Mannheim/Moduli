@@ -20,7 +20,7 @@ public class ModuleNotFoundException extends Exception
 	
 	
 	/**
-	 * @param msg
+	 * @param msg of the exception
 	 */
 	public ModuleNotFoundException(final String msg)
 	{

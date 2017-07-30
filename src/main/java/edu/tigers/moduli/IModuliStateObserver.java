@@ -19,8 +19,8 @@ import edu.tigers.moduli.listenerVariables.ModulesState;
 public interface IModuliStateObserver
 {
 	/**
-	 * @param state
-	 */
+     * @param state the new state
+     */
 	default void onModuliStateChanged(final ModulesState state)
 	{
 	}

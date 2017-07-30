@@ -20,8 +20,8 @@ public class LoadModulesException extends Exception
 	
 	
 	/**
-	 * @param msg
-	 * @param cause
+	 * @param msg of the exception
+	 * @param cause of the exception
 	 */
 	public LoadModulesException(final String msg, final Throwable cause)
 	{
@@ -30,7 +30,7 @@ public class LoadModulesException extends Exception
 	
 	
 	/**
-	 * @param msg
+	 * @param msg of the exception
 	 */
 	public LoadModulesException(final String msg)
 	{

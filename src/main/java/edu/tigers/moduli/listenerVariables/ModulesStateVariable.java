@@ -17,16 +17,10 @@ import java.beans.PropertyChangeSupport;
  */
 public class ModulesStateVariable
 {
-	// --------------------------------------------------------------------------
-	// --- instance variables ---------------------------------------------------
-	// --------------------------------------------------------------------------
 	private final PropertyChangeSupport	support;
 	private ModulesState						stateModules	= ModulesState.NOT_LOADED;
 	
 	
-	// --------------------------------------------------------------------------
-	// --- constructor(s) -------------------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * Initialize support for property-change-listener.
 	 */
@@ -36,13 +30,10 @@ public class ModulesStateVariable
 	}
 	
 	
-	// --------------------------------------------------------------------------
-	// --- method(s) ------------------------------------------------------------
-	// --------------------------------------------------------------------------
 	/**
 	 * Getter-method.
-	 * 
-	 * @return
+	 *
+	 * @return the state of the module
 	 */
 	public ModulesState get()
 	{
@@ -64,19 +55,12 @@ public class ModulesStateVariable
 	
 	
 	/**
-	 * -method.
-	 * 
-	 * @param moduleState
-	 * @return
+	 * @param moduleState the state of the module
+	 * @return whether the given module state equals the state of this module
 	 */
 	public boolean equals(final ModulesState moduleState)
 	{
-		if (stateModules.equals(moduleState))
-		{
-			return true;
-		}
-		
-		return false;
+		return stateModules.equals(moduleState);
 	}
 	
 	

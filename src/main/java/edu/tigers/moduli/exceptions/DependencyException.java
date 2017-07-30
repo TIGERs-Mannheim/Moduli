@@ -20,8 +20,8 @@ public class DependencyException extends Exception
 	
 	
 	/**
-	 * @param msg
-	 */
+     * @param msg of the exception
+     */
 	public DependencyException(final String msg)
 	{
 		super(msg);

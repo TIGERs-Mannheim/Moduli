@@ -20,8 +20,8 @@ public class StartModuleException extends Exception
 	
 	
 	/**
-	 * @param msg
-	 * @param cause
+	 * @param msg of the exception
+	 * @param cause of the exception
 	 */
 	public StartModuleException(final String msg, final Throwable cause)
 	{
