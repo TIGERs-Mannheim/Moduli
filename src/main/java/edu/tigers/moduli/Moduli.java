@@ -88,7 +88,7 @@ public class Moduli
 		moduleList.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
-		fillItWithNewModules(xmlFile);
+		fillModuleListWithNewModules(xmlFile);
 
 
 		checkDependencies();
@@ -96,7 +96,7 @@ public class Moduli
 		modulesState.set(ModulesState.RESOLVED);
 	}
 
-	private void fillItWithNewModules(String xmlFile) throws LoadModulesException {
+	private void fillModuleListWithNewModules(String xmlFile) throws LoadModulesException {
 		try {
 			XMLConfiguration config;
 

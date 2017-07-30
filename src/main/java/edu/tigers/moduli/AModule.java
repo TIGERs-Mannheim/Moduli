@@ -1,163 +1,131 @@
 package edu.tigers.moduli;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.configuration.SubnodeConfiguration;
-
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.StartModuleException;
+import org.apache.commons.configuration.SubnodeConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * Structure for
  */
-public abstract class AModule
-{
-	// --------------------------------------------------------------------------
-	// --- instance variables ---------------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	// --- module-infos ---
-	private String						id;
-	private String						type;
-	private SubnodeConfiguration	subnodeConfiguration;
-	private List<String>				dependencies	= new ArrayList<String>();
-	private boolean					startModule		= true;
-	
-	
-	// --------------------------------------------------------------------------
-	// --- abstract-methods -----------------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	/**
-	 * Inits module.
-	 * 
-	 * @throws InitModuleException
-	 */
-	public abstract void initModule() throws InitModuleException;
-	
-	
-	/**
-	 * DeInits module.
-	 */
-	public abstract void deinitModule();
-	
-	
-	/**
-	 * Starts module.
-	 * 
-	 * @throws StartModuleException
-	 */
-	public abstract void startModule() throws StartModuleException;
-	
-	
-	/**
-	 * Stops module.
-	 */
-	public abstract void stopModule();
-	
-	
-	// --------------------------------------------------------------------------
-	// --- getter/setter --------------------------------------------------------
-	// --------------------------------------------------------------------------
-	
-	/**
-	 * @return
-	 */
-	public String getId()
-	{
-		return id;
-	}
-	
-	
-	/**
-	 * @param id
-	 */
-	public void setId(final String id)
-	{
-		this.id = id;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public String getType()
-	{
-		return type;
-	}
-	
-	
-	/**
-	 * @param type
-	 */
-	public void setType(final String type)
-	{
-		this.type = type;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public List<String> getDependencies()
-	{
-		return dependencies;
-	}
-	
-	
-	/**
-	 * @param dependencies
-	 */
-	public void setDependencies(final List<String> dependencies)
-	{
-		this.dependencies = dependencies;
-	}
-	
-	
-	/**
-	 * @return
-	 */
-	public SubnodeConfiguration getSubnodeConfiguration()
-	{
-		return subnodeConfiguration;
-	}
-	
-	
-	void setSubnodeConfiguration(final SubnodeConfiguration subnodeConfiguration)
-	{
-		this.subnodeConfiguration = subnodeConfiguration;
-	}
-	
-	
-	@Override
-	public String toString()
-	{
-		StringBuilder builder = new StringBuilder();
-		builder.append("[id=");
-		builder.append(id);
-		builder.append(", type=");
-		builder.append(type);
-		builder.append("]");
-		return builder.toString();
-	}
-	
-	
-	/**
-	 * @return the active
-	 */
-	public boolean isStartModule()
-	{
-		return startModule;
-	}
-	
-	
-	/**
-	 * @param startModule
-	 */
-	public void setStartModule(final boolean startModule)
-	{
-		this.startModule = startModule;
-	}
+public abstract class AModule {
+    private String id;
+    private String type;
+    private SubnodeConfiguration subnodeConfiguration;
+    private List<String> dependencies = new ArrayList<>();
+    private boolean startModule = true;
+
+
+    /**
+     * Inits module.
+     *
+     * @throws InitModuleException if the module couldn't be initialized
+     */
+    public abstract void initModule() throws InitModuleException;
+
+
+    /**
+     * DeInits module.
+     */
+    public abstract void deinitModule();
+
+
+    /**
+     * Starts module.
+     *
+     * @throws StartModuleException if the module couldn't be started
+     */
+    public abstract void startModule() throws StartModuleException;
+
+
+    /**
+     * Stops module.
+     */
+    public abstract void stopModule();
+
+
+    /**
+     * @return the module id
+     */
+    public String getId() {
+        return id;
+    }
+
+
+    /**
+     * @param id the module id
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+
+    /**
+     * @return the module type
+     */
+    public String getType() {
+        return type;
+    }
+
+
+    /**
+     * @param type the module type
+     */
+    public void setType(final String type) {
+        this.type = type;
+    }
+
+
+    /**
+     * @return the list of dependencies
+     */
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
+
+    /**
+     * @param dependencies the new list of dependencies
+     */
+    public void setDependencies(final List<String> dependencies) {
+        this.dependencies = dependencies;
+    }
+
+
+    /**
+     * @return the subnode configuration
+     */
+    public SubnodeConfiguration getSubnodeConfiguration() {
+        return subnodeConfiguration;
+    }
+
+
+    void setSubnodeConfiguration(final SubnodeConfiguration subnodeConfiguration) {
+        this.subnodeConfiguration = subnodeConfiguration;
+    }
+
+
+    @Override
+    public String toString() {
+        return "[id=" + id + ", type=" + type + "]";
+    }
+
+
+    /**
+     * @return if the module should be started
+     */
+    public boolean isStartModule() {
+        return startModule;
+    }
+
+
+    /**
+     * @param startModule whether to start this module
+     */
+    public void setStartModule(final boolean startModule) {
+        this.startModule = startModule;
+    }
 }
