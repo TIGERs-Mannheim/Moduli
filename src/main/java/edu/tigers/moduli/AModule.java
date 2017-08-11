@@ -13,7 +13,6 @@ import java.util.List;
  */
 public abstract class AModule {
     private String id;
-    private String type;
     private SubnodeConfiguration subnodeConfiguration;
     private List<String> dependencies = new ArrayList<>();
     private boolean startModule = true;
@@ -64,22 +63,6 @@ public abstract class AModule {
 
 
     /**
-     * @return the module type
-     */
-    public String getType() {
-        return type;
-    }
-
-
-    /**
-     * @param type the module type
-     */
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-
-    /**
      * @return the list of dependencies
      */
     public List<String> getDependencies() {
@@ -110,7 +93,7 @@ public abstract class AModule {
 
     @Override
     public String toString() {
-        return "[id=" + id + ", type=" + type + "]";
+        return "[id=" + id + "]";
     }
 
 
