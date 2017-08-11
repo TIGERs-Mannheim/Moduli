@@ -12,7 +12,7 @@ import java.util.List;
  * Structure for
  */
 public abstract class AModule {
-    private String id;
+    private Class<? extends AModule> clazz;
     private String type;
     private SubnodeConfiguration subnodeConfiguration;
     private List<String> dependencies = new ArrayList<>();
@@ -48,18 +48,18 @@ public abstract class AModule {
 
 
     /**
-     * @return the module id
+     * @return the module clazz
      */
-    public String getId() {
-        return id;
+    public Class<? extends AModule> getId() {
+        return clazz;
     }
 
 
     /**
-     * @param id the module id
+     * @param clazz the module clazz
      */
-    public void setId(final String id) {
-        this.id = id;
+    public void setId(final Class<? extends AModule> clazz) {
+        this.clazz = clazz;
     }
 
 
@@ -110,7 +110,7 @@ public abstract class AModule {
 
     @Override
     public String toString() {
-        return "[id=" + id + ", type=" + type + "]";
+        return clazz.getSimpleName();
     }
 
 

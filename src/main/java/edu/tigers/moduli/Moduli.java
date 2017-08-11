@@ -96,87 +96,82 @@ public class Moduli
 		modulesState.set(ModulesState.RESOLVED);
 	}
 
-	private void fillModuleListWithNewModules(String xmlFile) throws LoadModulesException {
-		try {
-			XMLConfiguration config;
+    @SuppressWarnings("unchecked")
+    private void fillModuleListWithNewModules(String xmlFile) throws LoadModulesException {
+        try {
+            XMLConfiguration config;
 
-			config = new XMLConfiguration(xmlFile);
+            config = new XMLConfiguration(xmlFile);
 
-			// --- set moduli-folder ---
-			String implsPath = config.getString("moduliPath");
-			if (!implsPath.isEmpty())
-			{
-				implsPath += ".";
-			}
+            // --- set moduli-folder ---
+            String implsPath = config.getString("moduliPath");
+            if (!implsPath.isEmpty()) {
+                implsPath += ".";
+            }
 
-			// --- set globalConfiguration ---
-			globalConfiguration = config.configurationAt("globalConfiguration");
+            // --- set globalConfiguration ---
+            globalConfiguration = config.configurationAt("globalConfiguration");
 
-			// --- load modules into modulesList ---
-			for (int i = 0; i <= config.getMaxIndex("module"); i++)
-			{
+            // --- load modules into modulesList ---
+            for (int i = 0; i <= config.getMaxIndex("module"); i++) {
 
-				// --- create implementation- and properties-class ---
-				Class<?> clazz = Class.forName(implsPath + config.getString("module(" + i + ").implementation"));
+                // --- create implementation- and properties-class ---
+                Class<? extends AModule> clazz = (Class<? extends AModule>) Class.forName(implsPath + config.getString("module(" + i + ").implementation"));
 
-				// --- get properties from configuration and put it into a object[] ---
-				SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
-				Object[] propArgs = new Object[] { moduleConfig };
+                // --- get properties from configuration and put it into a object[] ---
+                SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
+                Object[] propArgs = new Object[]{moduleConfig};
 
-				// --- get constructor of implementation-class with subnodeConfiguration-parameter ---
-				Constructor<?> clazzConstructor = clazz.getConstructor(PROP_ARGS_CLASS);
+                // --- get constructor of implementation-class with subnodeConfiguration-parameter ---
+                Constructor<?> clazzConstructor = clazz.getConstructor(PROP_ARGS_CLASS);
 
-				// --- create object (use constructor) ---
-				AModule module = (AModule) createObject(clazzConstructor, propArgs);
+                // --- create object (use constructor) ---
+                AModule module = (AModule) createObject(clazzConstructor, propArgs);
 
-				// --- set module config ---
-				module.setSubnodeConfiguration(moduleConfig);
+                // --- set module config ---
+                module.setSubnodeConfiguration(moduleConfig);
 
-				// --- set id ---
-				module.setId(config.getString("module(" + i + ")[@id]"));
+                // --- set id ---
+                module.setId(clazz);
 
-				// --- set type ---
-				module.setType(config.getString("module(" + i + ")[@type]"));
+                // --- set type ---
+                module.setType(config.getString("module(" + i + ")[@type]"));
 
-				// --- check if module is unique ---
-				for (AModule m : moduleList)
-				{
-					if (m.getId().equals(module.getId()))
-					{
-						throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
-					}
-				}
+                // --- check if module is unique ---
+                for (AModule m : moduleList) {
+                    if (m.getId().equals(module.getId())) {
+                        throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
+                    }
+                }
 
-				// --- set dependency-list ---
-				List<String> depList = Arrays.asList(config.getStringArray("module(" + i + ").dependency"));
-				module.setDependencies(depList);
+                // --- set dependency-list ---
+                List<String> depList = Arrays.asList(config.getStringArray("module(" + i + ").dependency"));
+                module.setDependencies(depList);
 
 
-				// --- put module into moduleList ---
-				moduleList.add(module);
+                // --- put module into moduleList ---
+                moduleList.add(module);
 
-				log.trace("Module created: " + module);
-			}
+                log.trace("Module created: " + module);
+            }
 
-		} catch (ConfigurationException e) {
-			throw new LoadModulesException("Configuration contains errors: " + e.getMessage(), e);
-		} catch (ClassNotFoundException e)
-		{
-			throw new LoadModulesException("Class in configuration can't be found: " + e.getMessage(), e);
-		} catch (SecurityException e)
-		{
-			throw new LoadModulesException("Security issue at configuration : " + e.getMessage(), e);
-		} catch (NoSuchMethodException e)
-		{
-			throw new LoadModulesException(
-					"Can't find a constructor <init>(SubnodeConfiguration) of this class. Please add one. : "
-							+ e.getMessage(),
-					e);
-		} catch (IllegalArgumentException e)
-		{
-			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
-		}
-	}
+        } catch (ConfigurationException e) {
+            throw new LoadModulesException("Configuration contains errors: " + e.getMessage(), e);
+        } catch (ClassNotFoundException e) {
+            throw new LoadModulesException("Class in configuration can't be found: " + e.getMessage(), e);
+        } catch (ClassCastException e) {
+            throw new LoadModulesException("Given implementation is not an instance of AModule: " + e.getMessage(), e);
+        } catch (SecurityException e) {
+            throw new LoadModulesException("Security issue at configuration : " + e.getMessage(), e);
+        } catch (NoSuchMethodException e) {
+            throw new LoadModulesException(
+                    "Can't find a constructor <init>(SubnodeConfiguration) of this class. Please add one. : "
+                            + e.getMessage(),
+                    e);
+        } catch (IllegalArgumentException e) {
+            throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
+        }
+    }
 
 
 	/**
