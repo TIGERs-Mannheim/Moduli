@@ -135,9 +135,6 @@ public class Moduli
 				// --- set id ---
 				module.setId(config.getString("module(" + i + ")[@id]"));
 
-				// --- set type ---
-				module.setType(config.getString("module(" + i + ")[@type]"));
-
 				// --- check if module is unique ---
 				for (AModule m : moduleList)
 				{
