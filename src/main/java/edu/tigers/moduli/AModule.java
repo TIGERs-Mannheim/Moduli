@@ -14,7 +14,7 @@ import java.util.List;
 public abstract class AModule {
     private Class<? extends AModule> clazz;
     private SubnodeConfiguration subnodeConfiguration;
-    private List<String> dependencies = new ArrayList<>();
+    private List<Class<? extends AModule>> dependencies = new ArrayList<>();
     private boolean startModule = true;
 
 
@@ -65,7 +65,7 @@ public abstract class AModule {
     /**
      * @return the list of dependencies
      */
-    public List<String> getDependencies() {
+    public List<Class<? extends AModule>> getDependencies() {
         return dependencies;
     }
 
@@ -73,7 +73,7 @@ public abstract class AModule {
     /**
      * @param dependencies the new list of dependencies
      */
-    public void setDependencies(final List<String> dependencies) {
+    public void setDependencies(final List<Class<? extends AModule>> dependencies) {
         this.dependencies = dependencies;
     }
 
