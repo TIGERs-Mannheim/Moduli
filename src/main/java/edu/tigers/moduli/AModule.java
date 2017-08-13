@@ -13,7 +13,6 @@ import java.util.List;
  */
 public abstract class AModule {
     private Class<? extends AModule> clazz;
-    private String type;
     private SubnodeConfiguration subnodeConfiguration;
     private List<String> dependencies = new ArrayList<>();
     private boolean startModule = true;
@@ -60,22 +59,6 @@ public abstract class AModule {
      */
     public void setId(final Class<? extends AModule> clazz) {
         this.clazz = clazz;
-    }
-
-
-    /**
-     * @return the module type
-     */
-    public String getType() {
-        return type;
-    }
-
-
-    /**
-     * @param type the module type
-     */
-    public void setType(final String type) {
-        this.type = type;
     }
 
 

@@ -134,15 +134,14 @@ public class Moduli
                 // --- set id ---
                 module.setId(clazz);
 
-                // --- set type ---
-                module.setType(config.getString("module(" + i + ")[@type]"));
+				// ---  check if module is unique ---
+				for (AModule m : moduleList){
 
-                // --- check if module is unique ---
-                for (AModule m : moduleList) {
-                    if (m.getId().equals(module.getId())) {
-                        throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
-                    }
-                }
+					if (m.getId().equals(module.getId()))
+					{
+						throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
+					}
+				}
 
                 // --- set dependency-list ---
                 List<String> depList = Arrays.asList(config.getStringArray("module(" + i + ").dependency"));
