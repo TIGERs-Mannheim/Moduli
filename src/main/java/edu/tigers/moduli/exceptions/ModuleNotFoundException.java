@@ -10,20 +10,18 @@
 package edu.tigers.moduli.exceptions;
 
 /**
- * Exception if the module-system isn't able to resolve the modules.
+ * Exception if the module-system isn't able to find a module.
  */
-public class ModuleNotFoundException extends Exception
-{
-	
-	/**  */
-	private static final long	serialVersionUID	= -3273863493959166184L;
-	
-	
-	/**
-	 * @param msg of the exception
-	 */
-	public ModuleNotFoundException(final String msg)
-	{
-		super(msg);
-	}
+public class ModuleNotFoundException extends RuntimeException {
+
+    /**  */
+    private static final long serialVersionUID = -3273863493959166184L;
+
+
+    /**
+     * @param msg of the exception
+     */
+    public ModuleNotFoundException(final String msg) {
+        super(msg);
+    }
 }

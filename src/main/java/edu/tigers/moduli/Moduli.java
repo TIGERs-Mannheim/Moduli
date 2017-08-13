@@ -265,7 +265,7 @@ public class Moduli {
      *
      * @return all modules
      */
-    public List<? extends AModule> getModules() {
+    public List<AModule> getModules() {
         return new ArrayList<>(modules.values());
     }
 
@@ -278,7 +278,7 @@ public class Moduli {
      * @throws ModuleNotFoundException if the module couldn't be found
      */
     @SuppressWarnings("unchecked")
-    public <T extends AModule> T getModule(Class<T> moduleId) throws ModuleNotFoundException {
+    public <T extends AModule> T getModule(Class<T> moduleId) {
         if (modules.containsKey(moduleId)) {
             throw new ModuleNotFoundException("Module " + moduleId + " not found");
         }
