@@ -17,8 +17,8 @@ import java.beans.PropertyChangeSupport;
  */
 public class ModulesStateVariable
 {
-	private final PropertyChangeSupport	support;
-	private ModulesState						stateModules	= ModulesState.NOT_LOADED;
+	private final PropertyChangeSupport support;
+	private ModulesState stateModules = ModulesState.NOT_LOADED;
 	
 	
 	/**
