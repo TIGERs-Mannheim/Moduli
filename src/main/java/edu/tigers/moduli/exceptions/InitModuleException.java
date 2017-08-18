@@ -16,7 +16,7 @@ public class InitModuleException extends Exception
 {
 	
 	/**  */
-	private static final long	serialVersionUID	= -712078133464068775L;
+	private static final long serialVersionUID = -712078133464068775L;
 	
 	
 	/**

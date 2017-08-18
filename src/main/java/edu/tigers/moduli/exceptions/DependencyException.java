@@ -16,12 +16,12 @@ public class DependencyException extends Exception
 {
 	
 	/**  */
-	private static final long	serialVersionUID	= -688270423190284593L;
+	private static final long serialVersionUID = -688270423190284593L;
 	
 	
 	/**
-     * @param msg of the exception
-     */
+	 * @param msg of the exception
+	 */
 	public DependencyException(final String msg)
 	{
 		super(msg);

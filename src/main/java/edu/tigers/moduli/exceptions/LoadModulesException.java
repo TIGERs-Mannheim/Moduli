@@ -16,7 +16,7 @@ public class LoadModulesException extends Exception
 {
 	
 	/**  */
-	private static final long	serialVersionUID	= -5850251277618067045L;
+	private static final long serialVersionUID = -5850251277618067045L;
 	
 	
 	/**
