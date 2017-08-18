@@ -329,14 +329,14 @@ public class Moduli
 	/**
 	 * Gets a module from current module-list.
 	 *
-	 * @param moduleId module-id-string
+	 * @param moduleId the type of the model
 	 * @return the instance of the module for the id
 	 * @throws ModuleNotFoundException if the module couldn't be found
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends AModule> T getModule(Class<T> moduleId)
 	{
-		if (modules.containsKey(moduleId))
+		if (!modules.containsKey(moduleId))
 		{
 			throw new ModuleNotFoundException("Module " + moduleId + " not found");
 		}
