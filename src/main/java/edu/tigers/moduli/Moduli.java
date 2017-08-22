@@ -372,7 +372,7 @@ public class Moduli
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
 		{
 			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException(e);
 		}
-		return null;
 	}
 }
