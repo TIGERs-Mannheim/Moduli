@@ -46,8 +46,6 @@ public class Moduli
 	
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	
-	private static final Class<?>[] PROP_ARGS_CLASS = new Class[] { SubnodeConfiguration.class };
-	
 	
 	/**
 	 * Getter modulesState.
@@ -135,8 +133,7 @@ public class Moduli
 				SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
 				Object[] propArgs = new Object[] { moduleConfig };
 				
-				// --- get constructor of implementation-class with subnodeConfiguration-parameter ---
-				Constructor<?> clazzConstructor = clazz.getConstructor(PROP_ARGS_CLASS);
+				Constructor<?> clazzConstructor = clazz.getConstructor();
 				
 				// --- create object (use constructor) ---
 				AModule module = (AModule) createObject(clazzConstructor, propArgs);
