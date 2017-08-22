@@ -371,8 +371,7 @@ public class Moduli
 			return constructor.newInstance(arguments);
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
 		{
-			log.error(e.getMessage(), e);
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("Error constructing module", e);
 		}
 	}
 	
