@@ -131,12 +131,11 @@ public class Moduli
 				
 				// --- get properties from configuration and put it into a object[] ---
 				SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, "properties"));
-				Object[] propArgs = new Object[] { moduleConfig };
 				
 				Constructor<?> clazzConstructor = clazz.getConstructor();
 				
 				// --- create object (use constructor) ---
-				AModule module = (AModule) createObject(clazzConstructor, propArgs);
+				AModule module = (AModule) createObject(clazzConstructor);
 				
 				// --- set module config ---
 				module.setSubnodeConfiguration(moduleConfig);
@@ -364,11 +363,11 @@ public class Moduli
 	/**
 	 * Creates an object from a constructor and its arguments.
 	 */
-	private Object createObject(final Constructor<?> constructor, final Object[] arguments)
+	private Object createObject(final Constructor<?> constructor)
 	{
 		try
 		{
-			return constructor.newInstance(arguments);
+			return constructor.newInstance();
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
 		{
 			throw new IllegalArgumentException("Error constructing module", e);
