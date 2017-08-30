@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<moduleTest>
+    <moduliPath></moduliPath>
+
+    <globalConfiguration>
+        <environment>MODULI</environment>
+    </globalConfiguration>
+
+    <module id="testModule">
+        <implementation>edu.tigers.moduli.modules.TestModule</implementation>
+
+        <properties>
+            <testProperty>exists</testProperty>
+        </properties>
+    </module>
+</moduleTest>
