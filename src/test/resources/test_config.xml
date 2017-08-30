@@ -10,6 +10,12 @@
     <module id="testModule">
         <implementation>edu.tigers.moduli.modules.TestModule</implementation>
 
+        <properties></properties>
+    </module>
+
+    <module id="configuredModule">
+        <implementation>edu.tigers.moduli.modules.ConfiguredTestModule</implementation>
+
         <properties>
             <testProperty>exists</testProperty>
         </properties>
