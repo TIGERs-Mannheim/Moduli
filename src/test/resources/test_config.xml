@@ -19,5 +19,7 @@
         <properties>
             <testProperty>exists</testProperty>
         </properties>
+
+        <dependency>edu.tigers.moduli.modules.TestModule</dependency>
     </module>
 </moduleTest>
