@@ -1,0 +1,16 @@
+stages:
+  - build
+
+cache:
+  key: '$CI_PIPELINE_ID'
+  paths:
+    - '.m2/repository'
+
+variables:
+  MVN_OPTIONS: '-B -Dmaven.repo.local=.m2/repository -Dmaven.javadoc.skip=true'
+
+build:
+  stage: build
+  image: maven:3-jdk-8
+  script:
+    - 'mvn ${MVN_OPTIONS} clean install'

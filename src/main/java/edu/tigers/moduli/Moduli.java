@@ -46,8 +46,6 @@ public class Moduli
 	
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	
-	private static final Class<?>[] PROP_ARGS_CLASS = new Class[] { SubnodeConfiguration.class };
-	
 	
 	/**
 	 * Getter modulesState.
@@ -129,17 +127,15 @@ public class Moduli
 				
 				// --- create implementation- and properties-class ---
 				Class<? extends AModule> clazz = (Class<? extends AModule>) Class
-						.forName(implsPath + config.getString("module(" + i + ").implementation"));
+						.forName(implsPath + config.getString(moduleMessage(i, "implementation")));
 				
 				// --- get properties from configuration and put it into a object[] ---
-				SubnodeConfiguration moduleConfig = config.configurationAt("module(" + i + ").properties");
-				Object[] propArgs = new Object[] { moduleConfig };
+				SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, "properties"));
 				
-				// --- get constructor of implementation-class with subnodeConfiguration-parameter ---
-				Constructor<?> clazzConstructor = clazz.getConstructor(PROP_ARGS_CLASS);
+				Constructor<?> clazzConstructor = clazz.getConstructor();
 				
 				// --- create object (use constructor) ---
-				AModule module = (AModule) createObject(clazzConstructor, propArgs);
+				AModule module = (AModule) createObject(clazzConstructor);
 				
 				// --- set module config ---
 				module.setSubnodeConfiguration(moduleConfig);
@@ -154,7 +150,7 @@ public class Moduli
 				}
 				
 				// --- set dependency-list ---
-				List<String> rawDependencyList = Arrays.asList(config.getStringArray("module(" + i + ").dependency"));
+				List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, "dependency")));
 				List<Class<? extends AModule>> dependencyList = new ArrayList<>();
 				for (String dependency : rawDependencyList)
 				{
@@ -236,7 +232,7 @@ public class Moduli
 			{
 				log.trace("Initializing module " + m);
 				m.initModule();
-				log.trace("Module " + m + " initialized");
+				log.trace(moduleMessage(m, "initialized"));
 			} catch (Exception err)
 			{
 				throw new InitModuleException("Could not initialize module " + m, err);
@@ -257,7 +253,7 @@ public class Moduli
 			{
 				log.trace("Starting module " + m);
 				m.startModule();
-				log.trace("Module " + m + " started");
+				log.trace(moduleMessage(m, "started"));
 			} catch (Exception err)
 			{
 				throw new StartModuleException("Could not initialize module " + m, err);
@@ -290,7 +286,7 @@ public class Moduli
 			try
 			{
 				m.stopModule();
-				log.trace("Module " + m + " stopped");
+				log.trace(moduleMessage(m, "stopped"));
 			} catch (Exception err)
 			{
 				log.error("Exception while stopping module: " + m, err);
@@ -306,7 +302,7 @@ public class Moduli
 			try
 			{
 				m.deinitModule();
-				log.trace("Module " + m + " deinitialized");
+				log.trace(moduleMessage(m, "deinitialized"));
 			} catch (Exception err)
 			{
 				log.error("Exception while deinitializing module: " + m, err);
@@ -338,7 +334,7 @@ public class Moduli
 	{
 		if (!modules.containsKey(moduleId))
 		{
-			throw new ModuleNotFoundException("Module " + moduleId + " not found");
+			throw new ModuleNotFoundException(moduleMessage(moduleId, "not found"));
 		}
 		return (T) modules.get(moduleId);
 	}
@@ -367,15 +363,26 @@ public class Moduli
 	/**
 	 * Creates an object from a constructor and its arguments.
 	 */
-	private Object createObject(final Constructor<?> constructor, final Object[] arguments)
+	private Object createObject(final Constructor<?> constructor)
 	{
 		try
 		{
-			return constructor.newInstance(arguments);
+			return constructor.newInstance();
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
 		{
-			log.error(e.getMessage(), e);
+			throw new IllegalArgumentException("Error constructing module", e);
 		}
-		return null;
+	}
+	
+	
+	private String moduleMessage(Object module, String message)
+	{
+		return "Module " + module + " " + message;
+	}
+	
+	
+	private String moduleMessage(int moduleNumber, String property)
+	{
+		return "module(" + moduleNumber + ")." + property;
 	}
 }
