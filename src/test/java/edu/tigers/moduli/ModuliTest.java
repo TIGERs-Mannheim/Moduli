@@ -4,9 +4,8 @@
 
 package edu.tigers.moduli;
 
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -45,15 +44,14 @@ public class ModuliTest
 		assertEquals(ModulesState.NOT_LOADED, moduli.getModulesState().get());
 		
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
-		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
-		
-		assertThat(moduli.isModuleLoaded(TestModule.class), is(true));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
+		assertThat(moduli.isModuleLoaded(TestModule.class)).isTrue();
 		
 		moduli.startModules();
-		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.ACTIVE);
 		
 		moduli.stopModules();
-		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
 	}
 	
 	
@@ -78,14 +76,14 @@ public class ModuliTest
 	public void testEmptyConfig() throws Exception
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
-		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
-		assertThat(moduli.isModuleLoaded(TestModule.class), is(false));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
+		assertThat(moduli.isModuleLoaded(TestModule.class)).isFalse();
 		
 		moduli.startModules();
-		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.ACTIVE);
 		
 		moduli.stopModules();
-		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
 	}
 	
 	
@@ -94,7 +92,7 @@ public class ModuliTest
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
 		String env = moduli.getGlobalConfiguration().getString("environment");
-		assertThat(env, is("MODULI"));
+		assertThat(env).isEqualTo("MODULI");
 	}
 	
 	
@@ -104,7 +102,7 @@ public class ModuliTest
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
 		moduli.startModules();
 		ConfiguredTestModule module = moduli.getModule(ConfiguredTestModule.class);
-		assertThat(module.getConfigProperty(), is("exists"));
+		assertThat(module.getConfigProperty()).isEqualTo("exists");
 	}
 	
 }
