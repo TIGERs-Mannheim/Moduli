@@ -47,6 +47,8 @@ public class ModuliTest
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
 		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
 		
+		assertThat(moduli.isModuleLoaded(TestModule.class), is(true));
+		
 		moduli.startModules();
 		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));
 		
@@ -77,6 +79,7 @@ public class ModuliTest
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
 		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
+		assertThat(moduli.isModuleLoaded(TestModule.class), is(false));
 		
 		moduli.startModules();
 		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));

@@ -341,6 +341,18 @@ public class Moduli
 	
 	
 	/**
+	 * Check whether a module is loaded.
+	 * 
+	 * @param moduleId the Class of the module
+	 * @return if the module is loaded
+	 */
+	public boolean isModuleLoaded(Class<? extends AModule> moduleId)
+	{
+		return modules.containsKey(moduleId);
+	}
+	
+	
+	/**
 	 * Checks, if dependencies can be resolved.
 	 *
 	 * @throws DependencyException ... if at least one modules can't be resolved
