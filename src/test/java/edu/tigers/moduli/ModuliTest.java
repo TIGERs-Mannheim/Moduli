@@ -4,7 +4,9 @@
 
 package edu.tigers.moduli;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -43,13 +45,13 @@ public class ModuliTest
 		assertEquals(ModulesState.NOT_LOADED, moduli.getModulesState().get());
 		
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
-		assertEquals(ModulesState.RESOLVED, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
 		
 		moduli.startModules();
-		assertEquals(ModulesState.ACTIVE, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));
 		
 		moduli.stopModules();
-		assertEquals(ModulesState.RESOLVED, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
 	}
 	
 	
@@ -74,13 +76,13 @@ public class ModuliTest
 	public void testEmptyConfig() throws Exception
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
-		assertEquals(ModulesState.RESOLVED, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
 		
 		moduli.startModules();
-		assertEquals(ModulesState.ACTIVE, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.ACTIVE));
 		
 		moduli.stopModules();
-		assertEquals(ModulesState.RESOLVED, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get(), is(ModulesState.RESOLVED));
 	}
 	
 	
@@ -89,7 +91,7 @@ public class ModuliTest
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
 		String env = moduli.getGlobalConfiguration().getString("environment");
-		assertEquals("MODULI", env);
+		assertThat(env, is("MODULI"));
 	}
 	
 	
@@ -99,7 +101,7 @@ public class ModuliTest
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
 		moduli.startModules();
 		ConfiguredTestModule module = moduli.getModule(ConfiguredTestModule.class);
-		assertEquals("exists", module.getConfigProperty());
+		assertThat(module.getConfigProperty(), is("exists"));
 	}
 	
 }
