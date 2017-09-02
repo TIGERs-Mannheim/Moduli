@@ -124,13 +124,21 @@ public class Moduli
 			// --- load modules into modulesList ---
 			for (int i = 0; i <= config.getMaxIndex("module"); i++)
 			{
+				Class<? extends AModule> id = (Class<? extends AModule>) Class
+						.forName(implsPath + config.getString(moduleMessage(i, "[@id]")));
 				
-				// --- create implementation- and properties-class ---
-				Class<? extends AModule> clazz = (Class<? extends AModule>) Class
-						.forName(implsPath + config.getString(moduleMessage(i, "implementation")));
+				Class<? extends AModule> clazz;
+				final String implementationKey = moduleMessage(i, ".implementation");
+				if (config.containsKey(implementationKey))
+				{
+					clazz = (Class<? extends AModule>) Class.forName(implsPath + config.getString(implementationKey));
+				} else
+				{
+					clazz = id;
+				}
 				
 				// --- get properties from configuration and put it into a object[] ---
-				SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, "properties"));
+				SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, ".properties"));
 				
 				Constructor<?> clazzConstructor = clazz.getConstructor();
 				
@@ -141,7 +149,7 @@ public class Moduli
 				module.setSubnodeConfiguration(moduleConfig);
 				
 				// --- set id ---
-				module.setId(clazz);
+				module.setId(id);
 				
 				// --- check if module is unique ---
 				if (modules.containsKey(module.getId()))
@@ -150,7 +158,7 @@ public class Moduli
 				}
 				
 				// --- set dependency-list ---
-				List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, "dependency")));
+				List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, ".dependency")));
 				List<Class<? extends AModule>> dependencyList = new ArrayList<>();
 				for (String dependency : rawDependencyList)
 				{
@@ -159,7 +167,7 @@ public class Moduli
 				module.setDependencies(dependencyList);
 				
 				
-				modules.put(clazz, module);
+				modules.put(id, module);
 				
 				log.trace("Module created: " + module);
 			}
@@ -395,6 +403,6 @@ public class Moduli
 	
 	private String moduleMessage(int moduleNumber, String property)
 	{
-		return "module(" + moduleNumber + ")." + property;
+		return "module(" + moduleNumber + ")" + property;
 	}
 }

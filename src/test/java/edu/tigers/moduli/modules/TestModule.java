@@ -5,79 +5,21 @@
 package edu.tigers.moduli.modules;
 
 import edu.tigers.moduli.AModule;
-import edu.tigers.moduli.exceptions.InitModuleException;
-import edu.tigers.moduli.exceptions.StartModuleException;
 
 
-public class TestModule extends AModule
+public abstract class TestModule extends AModule
 {
-	private boolean isConstructed = false;
-	private boolean isInitialized = false;
-	private boolean isStarted = false;
-	private boolean isStopped = false;
-	private boolean isDeinitialized = false;
+	public abstract boolean isConstructed();
 	
 	
-	public TestModule()
-	{
-		this.isConstructed = true;
-	}
+	public abstract boolean isInitialized();
 	
 	
-	@Override
-	public void initModule() throws InitModuleException
-	{
-		isInitialized = true;
-	}
+	public abstract boolean isStarted();
 	
 	
-	@Override
-	public void startModule() throws StartModuleException
-	{
-		isStarted = true;
-	}
+	public abstract boolean isStopped();
 	
 	
-	@Override
-	public void stopModule()
-	{
-		isStopped = true;
-	}
-	
-	
-	@Override
-	public void deinitModule()
-	{
-		isDeinitialized = true;
-	}
-	
-	
-	public boolean isConstructed()
-	{
-		return isConstructed;
-	}
-	
-	
-	public boolean isInitialized()
-	{
-		return isInitialized;
-	}
-	
-	
-	public boolean isStarted()
-	{
-		return isStarted;
-	}
-	
-	
-	public boolean isStopped()
-	{
-		return isStopped;
-	}
-	
-	
-	public boolean isDeinitialized()
-	{
-		return isDeinitialized;
-	}
+	public abstract boolean isDeinitialized();
 }

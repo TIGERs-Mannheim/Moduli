@@ -7,14 +7,13 @@
         <environment>MODULI</environment>
     </globalConfiguration>
 
-    <module id="testModule">
-        <implementation>edu.tigers.moduli.modules.TestModule</implementation>
+    <module id="edu.tigers.moduli.modules.TestModule">
+        <implementation>edu.tigers.moduli.modules.ConcreteTestModule</implementation>
 
         <properties></properties>
     </module>
 
-    <module id="configuredModule">
-        <implementation>edu.tigers.moduli.modules.ConfiguredTestModule</implementation>
+    <module id="edu.tigers.moduli.modules.ConfiguredTestModule">
 
         <properties>
             <testProperty>exists</testProperty>
