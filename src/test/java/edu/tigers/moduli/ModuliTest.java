@@ -5,8 +5,6 @@
 package edu.tigers.moduli;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +39,7 @@ public class ModuliTest
 	@Test
 	public void testModuliCycle() throws Exception
 	{
-		assertEquals(ModulesState.NOT_LOADED, moduli.getModulesState().get());
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.NOT_LOADED);
 		
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
@@ -60,15 +58,15 @@ public class ModuliTest
 	{
 		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
 		TestModule module = moduli.getModule(TestModule.class);
-		assertTrue(module.isConstructed());
+		assertThat(module.isConstructed()).isTrue();
 		
 		moduli.startModules();
-		assertTrue(module.isInitialized());
-		assertTrue(module.isStarted());
+		assertThat(module.isInitialized()).isTrue();
+		assertThat(module.isStarted()).isTrue();
 		
 		moduli.stopModules();
-		assertTrue(module.isStopped());
-		assertTrue(module.isDeinitialized());
+		assertThat(module.isStopped()).isTrue();
+		assertThat(module.isDeinitialized()).isTrue();
 	}
 	
 	
