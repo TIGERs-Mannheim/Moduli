@@ -130,7 +130,7 @@ public class Moduli
 	
 	private void setGlobalConfiguration()
 	{
-		globalConfiguration = config.configurationAt("globalConfiguration");
+		globalConfiguration = getModuleConfig("globalConfiguration");
 	}
 	
 	
@@ -152,7 +152,7 @@ public class Moduli
 				clazz = id;
 			}
 			
-			SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, ".properties"));
+			SubnodeConfiguration moduleConfig = getModuleConfig(moduleMessage(i, ".properties"));
 			
 			AModule module = (AModule) createObject(clazz);
 			
@@ -175,6 +175,18 @@ public class Moduli
 			modules.put(id, module);
 			
 			log.trace("Module created: " + module);
+		}
+	}
+	
+	
+	private SubnodeConfiguration getModuleConfig(final String key)
+	{
+		try
+		{
+			return config.configurationAt(key);
+		} catch (IllegalArgumentException e)
+		{
+			return null;
 		}
 	}
 	

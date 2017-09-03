@@ -8,8 +8,6 @@
 
     <module id="edu.tigers.moduli.modules.TestModule">
         <implementation>edu.tigers.moduli.modules.ConcreteTestModule</implementation>
-
-        <properties></properties>
     </module>
 
     <module id="edu.tigers.moduli.modules.ConfiguredTestModule">
