@@ -111,13 +111,6 @@ public class Moduli
 			
 			config = new XMLConfiguration(xmlFile);
 			
-			// --- set moduli-folder ---
-			String implsPath = config.getString("moduliPath");
-			if (!implsPath.isEmpty())
-			{
-				implsPath += ".";
-			}
-			
 			// --- set globalConfiguration ---
 			globalConfiguration = config.configurationAt("globalConfiguration");
 			
@@ -125,13 +118,13 @@ public class Moduli
 			for (int i = 0; i <= config.getMaxIndex("module"); i++)
 			{
 				Class<? extends AModule> id = (Class<? extends AModule>) Class
-						.forName(implsPath + config.getString(moduleMessage(i, "[@id]")));
+						.forName(config.getString(moduleMessage(i, "[@id]")));
 				
 				Class<? extends AModule> clazz;
 				final String implementationKey = moduleMessage(i, ".implementation");
 				if (config.containsKey(implementationKey))
 				{
-					clazz = (Class<? extends AModule>) Class.forName(implsPath + config.getString(implementationKey));
+					clazz = (Class<? extends AModule>) Class.forName(config.getString(implementationKey));
 				} else
 				{
 					clazz = id;
