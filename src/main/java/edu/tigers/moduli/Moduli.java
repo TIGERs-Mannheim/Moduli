@@ -142,15 +142,7 @@ public class Moduli
 			Class<? extends AModule> id = (Class<? extends AModule>) Class
 					.forName(config.getString(moduleMessage(i, "[@id]")));
 			
-			Class<? extends AModule> clazz;
-			final String implementationKey = moduleMessage(i, ".implementation");
-			if (config.containsKey(implementationKey))
-			{
-				clazz = (Class<? extends AModule>) Class.forName(config.getString(implementationKey));
-			} else
-			{
-				clazz = id;
-			}
+			Class<? extends AModule> clazz = getImplementation(i, id);
 			
 			SubnodeConfiguration moduleConfig = getModuleConfig(moduleMessage(i, ".properties"));
 			
@@ -176,6 +168,19 @@ public class Moduli
 			
 			log.trace("Module created: " + module);
 		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private Class<? extends AModule> getImplementation(final int i, final Class<? extends AModule> id)
+			throws ClassNotFoundException
+	{
+		final String implementationKey = moduleMessage(i, ".implementation");
+		if (config.containsKey(implementationKey))
+		{
+			return (Class<? extends AModule>) Class.forName(config.getString(implementationKey));
+		}
+		return id;
 	}
 	
 	
