@@ -10,7 +10,6 @@
 
 package edu.tigers.moduli;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,13 +37,11 @@ import edu.tigers.moduli.listenerVariables.ModulesStateVariable;
  */
 public class Moduli
 {
-	private SubnodeConfiguration globalConfiguration;
-	
 	private static final Logger log = Logger.getLogger(Moduli.class.getName());
-	
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
-	
+	private SubnodeConfiguration globalConfiguration;
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
+	private XMLConfiguration config;
 	
 	
 	/**
@@ -93,7 +90,7 @@ public class Moduli
 		modules.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
-		fillModuleListWithNewModules(xmlFile);
+		loadModulesFromFile(xmlFile);
 		
 		
 		checkDependencies();
@@ -102,75 +99,15 @@ public class Moduli
 	}
 	
 	
-	@SuppressWarnings("unchecked")
-	private void fillModuleListWithNewModules(String xmlFile) throws LoadModulesException
+	private void loadModulesFromFile(String xmlFile) throws LoadModulesException
 	{
 		try
 		{
-			XMLConfiguration config;
-			
 			config = new XMLConfiguration(xmlFile);
 			
-			// --- set moduli-folder ---
-			String implsPath = config.getString("moduliPath");
-			if (!implsPath.isEmpty())
-			{
-				implsPath += ".";
-			}
+			setGlobalConfiguration();
 			
-			// --- set globalConfiguration ---
-			globalConfiguration = config.configurationAt("globalConfiguration");
-			
-			// --- load modules into modulesList ---
-			for (int i = 0; i <= config.getMaxIndex("module"); i++)
-			{
-				Class<? extends AModule> id = (Class<? extends AModule>) Class
-						.forName(implsPath + config.getString(moduleMessage(i, "[@id]")));
-				
-				Class<? extends AModule> clazz;
-				final String implementationKey = moduleMessage(i, ".implementation");
-				if (config.containsKey(implementationKey))
-				{
-					clazz = (Class<? extends AModule>) Class.forName(implsPath + config.getString(implementationKey));
-				} else
-				{
-					clazz = id;
-				}
-				
-				// --- get properties from configuration and put it into a object[] ---
-				SubnodeConfiguration moduleConfig = config.configurationAt(moduleMessage(i, ".properties"));
-				
-				Constructor<?> clazzConstructor = clazz.getConstructor();
-				
-				// --- create object (use constructor) ---
-				AModule module = (AModule) createObject(clazzConstructor);
-				
-				// --- set module config ---
-				module.setSubnodeConfiguration(moduleConfig);
-				
-				// --- set id ---
-				module.setId(id);
-				
-				// --- check if module is unique ---
-				if (modules.containsKey(module.getId()))
-				{
-					throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
-				}
-				
-				// --- set dependency-list ---
-				List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, ".dependency")));
-				List<Class<? extends AModule>> dependencyList = new ArrayList<>();
-				for (String dependency : rawDependencyList)
-				{
-					dependencyList.add((Class<? extends AModule>) Class.forName(dependency));
-				}
-				module.setDependencies(dependencyList);
-				
-				
-				modules.put(id, module);
-				
-				log.trace("Module created: " + module);
-			}
+			constructModules();
 			
 		} catch (ConfigurationException e)
 		{
@@ -184,15 +121,86 @@ public class Moduli
 		} catch (SecurityException e)
 		{
 			throw new LoadModulesException("Security issue at configuration : " + e.getMessage(), e);
-		} catch (NoSuchMethodException e)
-		{
-			throw new LoadModulesException(
-					"Can't find a constructor <init>(SubnodeConfiguration) of this class. Please add one. : "
-							+ e.getMessage(),
-					e);
 		} catch (IllegalArgumentException e)
 		{
 			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
+		}
+	}
+	
+	
+	private void setGlobalConfiguration()
+	{
+		globalConfiguration = getModuleConfig("globalConfiguration");
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private void constructModules() throws ClassNotFoundException, LoadModulesException
+	{
+		for (int i = 0; i <= config.getMaxIndex("module"); i++)
+		{
+			Class<? extends AModule> id = (Class<? extends AModule>) Class
+					.forName(config.getString(moduleMessage(i, "[@id]")));
+			
+			Class<? extends AModule> clazz = getImplementation(i, id);
+			
+			SubnodeConfiguration moduleConfig = getModuleConfig(moduleMessage(i, ".properties"));
+			
+			AModule module = (AModule) createObject(clazz);
+			
+			module.setSubnodeConfiguration(moduleConfig);
+			
+			module.setId(id);
+			
+			checkModuleIsUnique(module);
+			
+			// --- set dependency-list ---
+			List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, ".dependency")));
+			List<Class<? extends AModule>> dependencyList = new ArrayList<>();
+			for (String dependency : rawDependencyList)
+			{
+				dependencyList.add((Class<? extends AModule>) Class.forName(dependency));
+			}
+			module.setDependencies(dependencyList);
+			
+			
+			modules.put(id, module);
+			
+			log.trace("Module created: " + module);
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private Class<? extends AModule> getImplementation(final int i, final Class<? extends AModule> id)
+			throws ClassNotFoundException
+	{
+		final String implementationKey = moduleMessage(i, ".implementation");
+		if (config.containsKey(implementationKey))
+		{
+			return (Class<? extends AModule>) Class.forName(config.getString(implementationKey));
+		}
+		return id;
+	}
+	
+	
+	private SubnodeConfiguration getModuleConfig(final String key)
+	{
+		try
+		{
+			return config.configurationAt(key);
+		} catch (IllegalArgumentException e)
+		{
+			return null;
+		}
+	}
+	
+	
+	private void checkModuleIsUnique(final AModule module) throws LoadModulesException
+	{
+		if (modules.containsKey(module.getId()))
+		{
+			throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
 		}
 	}
 	
@@ -381,14 +389,17 @@ public class Moduli
 	
 	
 	/**
-	 * Creates an object from a constructor and its arguments.
+	 * Creates an object from a clazz.
+	 * 
+	 * @param clazz
 	 */
-	private Object createObject(final Constructor<?> constructor)
+	private Object createObject(final Class<? extends AModule> clazz)
 	{
 		try
 		{
-			return constructor.newInstance();
-		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | IllegalArgumentException e)
+			return clazz.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
+				| IllegalArgumentException e)
 		{
 			throw new IllegalArgumentException("Error constructing module", e);
 		}
