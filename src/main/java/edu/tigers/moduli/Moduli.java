@@ -252,23 +252,25 @@ public class Moduli
 		try
 		{
 			DirectedAcyclicGraph<AModule, DefaultEdge> dependencyGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
-			modules.values().forEach(module -> {
+			for (AModule module : modules.values())
+			{
 				dependencyGraph.addVertex(module);
-				module.getDependencies().forEach(dependencyId -> {
+				for (Class<? extends AModule> dependencyId : module.getDependencies())
+				{
 					AModule dependency = modules.get(dependencyId);
 					if (dependency == null)
 					{
-						throw new IllegalArgumentException(
-								dependencyId + " is required by " + module + ", but not started.");
+						throw new InitModuleException(
+								"Dependency " + dependencyId + " is required by " + module + ", but not started.");
 					}
 					dependencyGraph.addVertex(dependency);
 					dependencyGraph.addEdge(module, dependency);
-				});
-			});
+				}
+			}
 			return dependencyGraph;
 		} catch (IllegalArgumentException e)
 		{
-			throw new InitModuleException("Error resolving dependencies: ", e);
+			throw new InitModuleException("Cycle in dependencies: ", e);
 		}
 	}
 	
