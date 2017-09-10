@@ -26,7 +26,6 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -87,17 +86,14 @@ public class Moduli
 	 *
 	 * @param xmlFile (module-)configuration-file
 	 * @throws LoadModulesException an error occurs... Can't continue.
-	 * @throws DependencyException when dependencies are not met
 	 */
-	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
+	public void loadModules(final String xmlFile) throws LoadModulesException
 	{
 		modules.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 		
-		
-		checkDependencies();
 		
 		modulesState.set(ModulesState.RESOLVED);
 	}
@@ -221,7 +217,7 @@ public class Moduli
 			// --- get modules from configuration-file ---
 			loadModules(filename);
 			log.debug("Loaded config: " + filename);
-		} catch (final LoadModulesException | DependencyException e)
+		} catch (final LoadModulesException e)
 		{
 			log.error(e.getMessage() + " (moduleConfigFile: '" + filename
 					+ "') ", e);
@@ -402,26 +398,6 @@ public class Moduli
 	public boolean isModuleLoaded(Class<? extends AModule> moduleId)
 	{
 		return modules.containsKey(moduleId);
-	}
-	
-	
-	/**
-	 * Checks, if dependencies can be resolved.
-	 *
-	 * @throws DependencyException ... if at least one modules can't be resolved
-	 */
-	private void checkDependencies() throws DependencyException
-	{
-		for (AModule m : modules.values())
-		{
-			for (Class<? extends AModule> dependency : m.getDependencies())
-			{
-				if (!modules.containsKey(dependency))
-				{
-					throw new DependencyException("Dependency '" + dependency + "' isn't met at module '" + m.getId() + "'");
-				}
-			}
-		}
 	}
 	
 	
