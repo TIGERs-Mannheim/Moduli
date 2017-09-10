@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -236,12 +235,15 @@ public class Moduli
 	 * @throws InitModuleException if the initialization of a module fails
 	 * @throws StartModuleException if the start of a module fails
 	 */
+	@SuppressWarnings("unchecked")
 	public void startModules() throws InitModuleException, StartModuleException
 	{
 		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
+		List<AModule> orderedModules = new ArrayList<>();
+		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(orderedModules::add);
 		
-		initModules(new TopologicalOrderIterator<>(dependencyGraph));
-		startUpModules(new TopologicalOrderIterator<>(dependencyGraph));
+		initModules(orderedModules);
+		startUpModules(orderedModules);
 		
 		modulesState.set(ModulesState.ACTIVE);
 	}
@@ -275,11 +277,10 @@ public class Moduli
 	}
 	
 	
-	private void initModules(Iterator<AModule> orderedModules) throws InitModuleException
+	private void initModules(List<AModule> orderedModules) throws InitModuleException
 	{
-		while (orderedModules.hasNext())
+		for (AModule m : orderedModules)
 		{
-			AModule m = orderedModules.next();
 			try
 			{
 				log.trace("Initializing module " + m);
@@ -293,11 +294,10 @@ public class Moduli
 	}
 	
 	
-	private void startUpModules(Iterator<AModule> orderedModules) throws StartModuleException
+	private void startUpModules(List<AModule> orderedModules) throws StartModuleException
 	{
-		while (orderedModules.hasNext())
+		for (AModule m : orderedModules)
 		{
-			AModule m = orderedModules.next();
 			if (!m.isStartModule())
 			{
 				continue;
