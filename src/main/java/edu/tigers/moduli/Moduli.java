@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,10 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -233,17 +238,46 @@ public class Moduli
 	 */
 	public void startModules() throws InitModuleException, StartModuleException
 	{
-		initModules();
-		startUpModules();
+		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
+		
+		initModules(new TopologicalOrderIterator<>(dependencyGraph));
+		startUpModules(new TopologicalOrderIterator<>(dependencyGraph));
 		
 		modulesState.set(ModulesState.ACTIVE);
 	}
 	
 	
-	private void initModules() throws InitModuleException
+	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws InitModuleException
 	{
-		for (AModule m : modules.values())
+		try
 		{
+			DirectedAcyclicGraph<AModule, DefaultEdge> dependencyGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
+			modules.values().forEach(module -> {
+				dependencyGraph.addVertex(module);
+				module.getDependencies().forEach(dependencyId -> {
+					AModule dependency = modules.get(dependencyId);
+					if (dependency == null)
+					{
+						throw new IllegalArgumentException(
+								dependencyId + " is required by " + module + ", but not started.");
+					}
+					dependencyGraph.addVertex(dependency);
+					dependencyGraph.addEdge(module, dependency);
+				});
+			});
+			return dependencyGraph;
+		} catch (IllegalArgumentException e)
+		{
+			throw new InitModuleException("Error resolving dependencies: ", e);
+		}
+	}
+	
+	
+	private void initModules(Iterator<AModule> orderedModules) throws InitModuleException
+	{
+		while (orderedModules.hasNext())
+		{
+			AModule m = orderedModules.next();
 			try
 			{
 				log.trace("Initializing module " + m);
@@ -257,10 +291,11 @@ public class Moduli
 	}
 	
 	
-	private void startUpModules() throws StartModuleException
+	private void startUpModules(Iterator<AModule> orderedModules) throws StartModuleException
 	{
-		for (AModule m : modules.values())
+		while (orderedModules.hasNext())
 		{
+			AModule m = orderedModules.next();
 			if (!m.isStartModule())
 			{
 				continue;
