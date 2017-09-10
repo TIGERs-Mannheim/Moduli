@@ -6,6 +6,12 @@
         <environment>MODULI</environment>
     </globalConfiguration>
 
+    <module id="edu.tigers.moduli.modules.TestModule">
+        <implementation>edu.tigers.moduli.modules.ConcreteTestModule</implementation>
+
+        <dependency>edu.tigers.moduli.modules.ConfiguredTestModule</dependency>
+    </module>
+
     <module id="edu.tigers.moduli.modules.ConfiguredTestModule">
 
         <properties>
@@ -13,9 +19,5 @@
         </properties>
 
         <dependency>edu.tigers.moduli.modules.TestModule</dependency>
-    </module>
-
-    <module id="edu.tigers.moduli.modules.TestModule">
-        <implementation>edu.tigers.moduli.modules.ConcreteTestModule</implementation>
     </module>
 </moduleTest>

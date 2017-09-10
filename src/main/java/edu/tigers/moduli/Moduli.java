@@ -21,6 +21,10 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.log4j.Logger;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.InitModuleException;
@@ -39,6 +43,7 @@ public class Moduli
 {
 	private static final Logger log = Logger.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
+	private List<AModule> orderedModules = new ArrayList<>();
 	private SubnodeConfiguration globalConfiguration;
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	private XMLConfiguration config;
@@ -83,7 +88,6 @@ public class Moduli
 	 *
 	 * @param xmlFile (module-)configuration-file
 	 * @throws LoadModulesException an error occurs... Can't continue.
-	 * @throws DependencyException when dependencies are not met
 	 */
 	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
 	{
@@ -92,8 +96,8 @@ public class Moduli
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 		
-		
-		checkDependencies();
+		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
+		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(orderedModules::add);
 		
 		modulesState.set(ModulesState.RESOLVED);
 	}
@@ -214,7 +218,6 @@ public class Moduli
 	{
 		try
 		{
-			// --- get modules from configuration-file ---
 			loadModules(filename);
 			log.debug("Loaded config: " + filename);
 		} catch (final LoadModulesException | DependencyException e)
@@ -231,18 +234,48 @@ public class Moduli
 	 * @throws InitModuleException if the initialization of a module fails
 	 * @throws StartModuleException if the start of a module fails
 	 */
+	@SuppressWarnings("unchecked")
 	public void startModules() throws InitModuleException, StartModuleException
 	{
-		initModules();
-		startUpModules();
+		
+		initModules(orderedModules);
+		startUpModules(orderedModules);
 		
 		modulesState.set(ModulesState.ACTIVE);
 	}
 	
 	
-	private void initModules() throws InitModuleException
+	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws DependencyException
 	{
-		for (AModule m : modules.values())
+		try
+		{
+			DirectedAcyclicGraph<AModule, DefaultEdge> dependencyGraph = new DirectedAcyclicGraph<>(DefaultEdge.class);
+			for (AModule module : modules.values())
+			{
+				dependencyGraph.addVertex(module);
+				for (Class<? extends AModule> dependencyId : module.getDependencies())
+				{
+					AModule dependency = modules.get(dependencyId);
+					if (dependency == null)
+					{
+						throw new DependencyException(
+								"Dependency " + dependencyId + " is required by " + module + ", but not started.");
+					}
+					dependencyGraph.addVertex(dependency);
+					dependencyGraph.addEdge(module, dependency);
+				}
+			}
+			return dependencyGraph;
+		} catch (IllegalArgumentException e)
+		{
+			throw new DependencyException("Cycle in dependencies: ", e);
+		}
+	}
+	
+	
+	private void initModules(List<AModule> orderedModules) throws InitModuleException
+	{
+		for (AModule m : orderedModules)
 		{
 			try
 			{
@@ -257,9 +290,9 @@ public class Moduli
 	}
 	
 	
-	private void startUpModules() throws StartModuleException
+	private void startUpModules(List<AModule> orderedModules) throws StartModuleException
 	{
-		for (AModule m : modules.values())
+		for (AModule m : orderedModules)
 		{
 			if (!m.isStartModule())
 			{
@@ -365,26 +398,6 @@ public class Moduli
 	public boolean isModuleLoaded(Class<? extends AModule> moduleId)
 	{
 		return modules.containsKey(moduleId);
-	}
-	
-	
-	/**
-	 * Checks, if dependencies can be resolved.
-	 *
-	 * @throws DependencyException ... if at least one modules can't be resolved
-	 */
-	private void checkDependencies() throws DependencyException
-	{
-		for (AModule m : modules.values())
-		{
-			for (Class<? extends AModule> dependency : m.getDependencies())
-			{
-				if (!modules.containsKey(dependency))
-				{
-					throw new DependencyException("Dependency '" + dependency + "' isn't met at module '" + m.getId() + "'");
-				}
-			}
-		}
 	}
 	
 	

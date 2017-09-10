@@ -27,4 +27,13 @@ public class InitModuleException extends Exception
 	{
 		super(msg, cause);
 	}
+	
+	
+	/**
+	 * @param message
+	 */
+	public InitModuleException(final String message)
+	{
+		super(message);
+	}
 }

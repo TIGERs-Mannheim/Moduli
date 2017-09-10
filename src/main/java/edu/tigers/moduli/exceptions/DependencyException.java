@@ -26,4 +26,14 @@ public class DependencyException extends Exception
 	{
 		super(msg);
 	}
+	
+	
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public DependencyException(final String message, final Throwable cause)
+	{
+		super(message, cause);
+	}
 }
