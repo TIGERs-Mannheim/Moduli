@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.tigers.moduli.exceptions.InitModuleException;
+import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.moduli.modules.ConfiguredTestModule;
 import edu.tigers.moduli.modules.TestModule;
@@ -105,19 +105,17 @@ public class ModuliTest
 	}
 	
 	
-	@Test(expected = InitModuleException.class)
+	@Test(expected = DependencyException.class)
 	public void testCyclicConfiguration() throws Exception
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "cyclic_config.xml");
-		moduli.startModules();
+		moduli.loadModules(MODULE_CONFIG_PATH + "cyclic_config.xml");
 	}
 	
 	
-	@Test(expected = InitModuleException.class)
+	@Test(expected = DependencyException.class)
 	public void testUnresolvedDependencyConfiguration() throws Exception
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "unresolved_dependency_config.xml");
-		moduli.startModules();
+		moduli.loadModules(MODULE_CONFIG_PATH + "unresolved_dependency_config.xml");
 	}
 	
 }

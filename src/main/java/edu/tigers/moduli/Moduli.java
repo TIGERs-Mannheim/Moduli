@@ -26,6 +26,7 @@ import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
+import edu.tigers.moduli.exceptions.DependencyException;
 import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.exceptions.LoadModulesException;
 import edu.tigers.moduli.exceptions.ModuleNotFoundException;
@@ -42,6 +43,7 @@ public class Moduli
 {
 	private static final Logger log = Logger.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
+	private List<AModule> orderedModules = new ArrayList<>();
 	private SubnodeConfiguration globalConfiguration;
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	private XMLConfiguration config;
@@ -87,13 +89,15 @@ public class Moduli
 	 * @param xmlFile (module-)configuration-file
 	 * @throws LoadModulesException an error occurs... Can't continue.
 	 */
-	public void loadModules(final String xmlFile) throws LoadModulesException
+	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
 	{
 		modules.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 		
+		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
+		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(orderedModules::add);
 		
 		modulesState.set(ModulesState.RESOLVED);
 	}
@@ -214,10 +218,9 @@ public class Moduli
 	{
 		try
 		{
-			// --- get modules from configuration-file ---
 			loadModules(filename);
 			log.debug("Loaded config: " + filename);
-		} catch (final LoadModulesException e)
+		} catch (final LoadModulesException | DependencyException e)
 		{
 			log.error(e.getMessage() + " (moduleConfigFile: '" + filename
 					+ "') ", e);
@@ -234,9 +237,6 @@ public class Moduli
 	@SuppressWarnings("unchecked")
 	public void startModules() throws InitModuleException, StartModuleException
 	{
-		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
-		List<AModule> orderedModules = new ArrayList<>();
-		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(orderedModules::add);
 		
 		initModules(orderedModules);
 		startUpModules(orderedModules);
@@ -245,7 +245,7 @@ public class Moduli
 	}
 	
 	
-	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws InitModuleException
+	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws DependencyException
 	{
 		try
 		{
@@ -258,7 +258,7 @@ public class Moduli
 					AModule dependency = modules.get(dependencyId);
 					if (dependency == null)
 					{
-						throw new InitModuleException(
+						throw new DependencyException(
 								"Dependency " + dependencyId + " is required by " + module + ", but not started.");
 					}
 					dependencyGraph.addVertex(dependency);
@@ -268,7 +268,7 @@ public class Moduli
 			return dependencyGraph;
 		} catch (IllegalArgumentException e)
 		{
-			throw new InitModuleException("Cycle in dependencies: ", e);
+			throw new DependencyException("Cycle in dependencies: ", e);
 		}
 	}
 	
