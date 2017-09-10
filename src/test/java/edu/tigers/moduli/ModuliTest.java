@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.tigers.moduli.exceptions.InitModuleException;
 import edu.tigers.moduli.listenerVariables.ModulesState;
 import edu.tigers.moduli.modules.ConfiguredTestModule;
 import edu.tigers.moduli.modules.TestModule;
@@ -101,6 +102,22 @@ public class ModuliTest
 		moduli.startModules();
 		ConfiguredTestModule module = moduli.getModule(ConfiguredTestModule.class);
 		assertThat(module.getConfigProperty()).isEqualTo("exists");
+	}
+	
+	
+	@Test(expected = InitModuleException.class)
+	public void testCyclicConfiguration() throws Exception
+	{
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "cyclic_config.xml");
+		moduli.startModules();
+	}
+	
+	
+	@Test(expected = InitModuleException.class)
+	public void testUnresolvedDependencyConfiguration() throws Exception
+	{
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "unresolved_dependency_config.xml");
+		moduli.startModules();
 	}
 	
 }
