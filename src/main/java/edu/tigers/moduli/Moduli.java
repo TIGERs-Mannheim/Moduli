@@ -4,6 +4,7 @@
 
 package edu.tigers.moduli;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -406,7 +407,9 @@ public class Moduli
 	{
 		try
 		{
-			return clazz.getConstructor().newInstance();
+			Constructor<? extends AModule> constructor = clazz.getDeclaredConstructor();
+			constructor.setAccessible(true);
+			return constructor.newInstance();
 		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
 				| IllegalArgumentException e)
 		{
