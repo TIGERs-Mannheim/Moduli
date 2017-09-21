@@ -1,11 +1,5 @@
 /*
- * *********************************************************
- * Copyright (c) 2010 DHBW Mannheim - Tigers Mannheim
- * Project: tigers-centralSoftware
- * Date: 04.03.2010
- * Authors:
- * Bernhard Perun <bernhard.perun@googlemail.com>
- * *********************************************************
+ * Copyright (c) 2009 - 2017, DHBW Mannheim - TIGERs Mannheim
  */
 
 package edu.tigers.moduli;
@@ -18,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.configuration.tree.DefaultConfigurationNode;
 import org.apache.log4j.Logger;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
@@ -195,7 +191,7 @@ public class Moduli
 			return config.configurationAt(key);
 		} catch (IllegalArgumentException e)
 		{
-			return null;
+			return new SubnodeConfiguration(new HierarchicalConfiguration(), new DefaultConfigurationNode());
 		}
 	}
 	
