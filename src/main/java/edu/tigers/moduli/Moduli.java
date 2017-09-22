@@ -8,7 +8,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +42,7 @@ public class Moduli
 {
 	private static final Logger log = Logger.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
-	private List<AModule> orderedModules = new ArrayList<>();
+	private List<AModule> orderedModules = new LinkedList<>();
 	private SubnodeConfiguration globalConfiguration;
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	private XMLConfiguration config;
@@ -89,12 +91,13 @@ public class Moduli
 	public void loadModules(final String xmlFile) throws LoadModulesException, DependencyException
 	{
 		modules.clear();
+		orderedModules.clear();
 		
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 		
 		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
-		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(orderedModules::add);
+		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(m -> orderedModules.add(0, m));
 		
 		modulesState.set(ModulesState.RESOLVED);
 	}
@@ -313,17 +316,20 @@ public class Moduli
 	 */
 	public void stopModules()
 	{
-		internalStopModules();
+		List<AModule> reversedModules = new ArrayList<>(orderedModules);
+		Collections.reverse(reversedModules);
 		
-		deinitModules();
+		internalStopModules(reversedModules);
+		
+		deinitModules(reversedModules);
 		
 		modulesState.set(ModulesState.RESOLVED);
 	}
 	
 	
-	private void internalStopModules()
+	private void internalStopModules(final List<AModule> reversedModules)
 	{
-		for (AModule m : modules.values())
+		for (AModule m : reversedModules)
 		{
 			if (!m.isStartModule())
 			{
@@ -341,9 +347,9 @@ public class Moduli
 	}
 	
 	
-	private void deinitModules()
+	private void deinitModules(final List<AModule> reversedModules)
 	{
-		for (AModule m : modules.values())
+		for (AModule m : reversedModules)
 		{
 			try
 			{
