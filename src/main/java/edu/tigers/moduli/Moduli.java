@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -383,14 +384,29 @@ public class Moduli
 	@SuppressWarnings("unchecked")
 	public <T extends AModule> T getModule(Class<T> moduleId)
 	{
+		return getModuleOpt(moduleId)
+				.orElseThrow(() -> new ModuleNotFoundException(moduleMessage(moduleId, "not found")));
+	}
+	
+	
+	/**
+	 * Gets a module from current module-list.
+	 *
+	 * @param moduleId the type of the model
+	 * @return the instance of the module for the id
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends AModule> Optional<T> getModuleOpt(Class<T> moduleId)
+	{
 		final AModule aModule = modules.get(moduleId);
 		if (aModule != null)
 		{
-			return (T) aModule;
+			return Optional.of((T) aModule);
 		}
-		return (T) modules.values().stream()
-				.filter(m -> m.getClass().equals(moduleId)).findFirst()
-				.orElseThrow(() -> new ModuleNotFoundException(moduleMessage(moduleId, "not found")));
+		return modules.values().stream()
+				.filter(m -> m.getClass().equals(moduleId))
+				.map(a -> (T) a)
+				.findFirst();
 	}
 	
 	
