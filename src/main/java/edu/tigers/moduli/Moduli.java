@@ -7,7 +7,6 @@ package edu.tigers.moduli;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -159,7 +158,7 @@ public class Moduli
 			checkModuleIsUnique(module);
 			
 			// --- set dependency-list ---
-			List<String> rawDependencyList = Arrays.asList(config.getStringArray(moduleMessage(i, ".dependency")));
+			String[] rawDependencyList = config.getStringArray(moduleMessage(i, ".dependency"));
 			List<Class<? extends AModule>> dependencyList = new ArrayList<>();
 			for (String dependency : rawDependencyList)
 			{
@@ -384,11 +383,14 @@ public class Moduli
 	@SuppressWarnings("unchecked")
 	public <T extends AModule> T getModule(Class<T> moduleId)
 	{
-		if (!modules.containsKey(moduleId))
+		final AModule aModule = modules.get(moduleId);
+		if (aModule != null)
 		{
-			throw new ModuleNotFoundException(moduleMessage(moduleId, "not found"));
+			return (T) aModule;
 		}
-		return (T) modules.get(moduleId);
+		return (T) modules.values().stream()
+				.filter(m -> m.getClass().equals(moduleId)).findFirst()
+				.orElseThrow(() -> new ModuleNotFoundException(moduleMessage(moduleId, "not found")));
 	}
 	
 	
@@ -400,7 +402,8 @@ public class Moduli
 	 */
 	public boolean isModuleLoaded(Class<? extends AModule> moduleId)
 	{
-		return modules.containsKey(moduleId);
+		return modules.containsKey(moduleId)
+				|| modules.values().stream().map(Object::getClass).anyMatch(c -> c.equals(moduleId));
 	}
 	
 	

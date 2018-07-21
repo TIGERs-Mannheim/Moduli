@@ -6,6 +6,12 @@ package edu.tigers.moduli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import edu.tigers.moduli.exceptions.InitModuleException;
+import edu.tigers.moduli.exceptions.LoadModulesException;
+import edu.tigers.moduli.exceptions.ModuleNotFoundException;
+import edu.tigers.moduli.exceptions.StartModuleException;
+import edu.tigers.moduli.modules.ConcreteTestModule;
+import edu.tigers.moduli.modules.UnusedConcreteTestModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,33 +24,43 @@ import edu.tigers.moduli.modules.TestModule;
 
 public class ModuliTest
 {
-	
 	private static final String MODULE_CONFIG_PATH = "src/test/resources/";
+	private static final String TEST_CONFIG_XML = "test_config.xml";
+	private static final String EMPTY_CONFIG_XML = "empty_config.xml";
+	private static final String CYCLIC_CONFIG_XML = "cyclic_config.xml";
+	private static final String UNRESOLVED_DEPENDENCY_CONFIG_XML = "unresolved_dependency_config.xml";
+	
 	private Moduli moduli;
 	
 	
 	@Before
-	public void setUp() throws Exception
+	public void setUp()
 	{
 		moduli = new Moduli();
 	}
 	
 	
 	@After
-	public void tearDown() throws Exception
+	public void tearDown()
 	{
 		moduli = null;
 	}
 	
 	
 	@Test
-	public void testModuliCycle() throws Exception
+	public void testModuliCycle() throws InitModuleException, StartModuleException
 	{
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.NOT_LOADED);
 		
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
+		
 		assertThat(moduli.isModuleLoaded(TestModule.class)).isTrue();
+		assertThat(moduli.isModuleLoaded(ConcreteTestModule.class)).isTrue();
+		assertThat(moduli.isModuleLoaded(UnusedConcreteTestModule.class)).isFalse();
+		
+		assertThat(moduli.getModule(TestModule.class).isConstructed()).isTrue();
+		assertThat(moduli.getModule(ConcreteTestModule.class).isConstructed()).isTrue();
 		
 		moduli.startModules();
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.ACTIVE);
@@ -55,9 +71,9 @@ public class ModuliTest
 	
 	
 	@Test
-	public void testModuleCycle() throws Exception
+	public void testModuleCycle() throws InitModuleException, StartModuleException
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
 		TestModule module = moduli.getModule(TestModule.class);
 		assertThat(module.isConstructed()).isTrue();
 		
@@ -72,9 +88,9 @@ public class ModuliTest
 	
 	
 	@Test
-	public void testEmptyConfig() throws Exception
+	public void testEmptyConfig() throws InitModuleException, StartModuleException
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + EMPTY_CONFIG_XML);
 		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
 		assertThat(moduli.isModuleLoaded(TestModule.class)).isFalse();
 		
@@ -87,18 +103,18 @@ public class ModuliTest
 	
 	
 	@Test
-	public void testGlobalConfiguration() throws Exception
+	public void testGlobalConfiguration()
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "empty_config.xml");
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + EMPTY_CONFIG_XML);
 		String env = moduli.getGlobalConfiguration().getString("environment");
 		assertThat(env).isEqualTo("MODULI");
 	}
 	
 	
 	@Test
-	public void testModuleConfiguration() throws Exception
+	public void testModuleConfiguration() throws InitModuleException, StartModuleException
 	{
-		moduli.loadModulesSafe(MODULE_CONFIG_PATH + "test_config.xml");
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
 		moduli.startModules();
 		ConfiguredTestModule module = moduli.getModule(ConfiguredTestModule.class);
 		assertThat(module.getConfigProperty()).isEqualTo("exists");
@@ -106,16 +122,27 @@ public class ModuliTest
 	
 	
 	@Test(expected = DependencyException.class)
-	public void testCyclicConfiguration() throws Exception
+	public void testCyclicConfiguration() throws DependencyException, LoadModulesException
 	{
-		moduli.loadModules(MODULE_CONFIG_PATH + "cyclic_config.xml");
+		moduli.loadModules(MODULE_CONFIG_PATH + CYCLIC_CONFIG_XML);
 	}
 	
 	
 	@Test(expected = DependencyException.class)
-	public void testUnresolvedDependencyConfiguration() throws Exception
+	public void testUnresolvedDependencyConfiguration() throws DependencyException, LoadModulesException
 	{
-		moduli.loadModules(MODULE_CONFIG_PATH + "unresolved_dependency_config.xml");
+		moduli.loadModules(MODULE_CONFIG_PATH + UNRESOLVED_DEPENDENCY_CONFIG_XML);
 	}
 	
+	
+	@Test(expected = ModuleNotFoundException.class)
+	public void testModuleNotFound()
+	{
+		moduli.loadModulesSafe(MODULE_CONFIG_PATH + TEST_CONFIG_XML);
+		assertThat(moduli.getModulesState().get()).isEqualTo(ModulesState.RESOLVED);
+		
+		assertThat(moduli.isModuleLoaded(TestModule.class)).isTrue();
+
+		moduli.getModule(UnusedConcreteTestModule.class);
+	}
 }
