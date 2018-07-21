@@ -25,13 +25,19 @@ public abstract class AModule
 	 *
 	 * @throws InitModuleException if the module couldn't be initialized
 	 */
-	public abstract void initModule() throws InitModuleException;
+	public void initModule() throws InitModuleException
+	{
+		// does nothing by default
+	}
 	
 	
 	/**
 	 * DeInits module.
 	 */
-	public abstract void deinitModule();
+	public void deinitModule()
+	{
+		// does nothing by default
+	}
 	
 	
 	/**
@@ -39,13 +45,19 @@ public abstract class AModule
 	 *
 	 * @throws StartModuleException if the module couldn't be started
 	 */
-	public abstract void startModule() throws StartModuleException;
+	public void startModule() throws StartModuleException
+	{
+		// does nothing by default
+	}
 	
 	
 	/**
 	 * Stops module.
 	 */
-	public abstract void stopModule();
+	public void stopModule()
+	{
+		// does nothing by default
+	}
 	
 	
 	/**
