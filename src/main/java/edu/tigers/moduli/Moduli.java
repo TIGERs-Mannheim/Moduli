@@ -19,7 +19,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.DefaultConfigurationNode;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -40,14 +41,14 @@ import edu.tigers.moduli.listenerVariables.ModulesStateVariable;
  */
 public class Moduli
 {
-	private static final Logger log = Logger.getLogger(Moduli.class.getName());
+	private static final Logger log = LogManager.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
 	private List<AModule> orderedModules = new LinkedList<>();
 	private SubnodeConfiguration globalConfiguration;
 	private ModulesStateVariable modulesState = new ModulesStateVariable();
 	private XMLConfiguration config;
-	
-	
+
+
 	/**
 	 * Getter modulesState.
 	 *
@@ -57,8 +58,8 @@ public class Moduli
 	{
 		return modulesState;
 	}
-	
-	
+
+
 	/**
 	 * Setter modulesState.
 	 * Only to use if you know what you are doing ;).
@@ -69,8 +70,8 @@ public class Moduli
 	{
 		this.modulesState = modulesState;
 	}
-	
-	
+
+
 	/**
 	 * Getter global configuration
 	 *
@@ -80,8 +81,8 @@ public class Moduli
 	{
 		return globalConfiguration;
 	}
-	
-	
+
+
 	/**
 	 * Loads all available modules from configuration-file into modulesList.
 	 *
@@ -92,27 +93,27 @@ public class Moduli
 	{
 		modules.clear();
 		orderedModules.clear();
-		
+
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
-		
+
 		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
 		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(m -> orderedModules.add(0, m));
-		
+
 		modulesState.set(ModulesState.RESOLVED);
 	}
-	
-	
+
+
 	private void loadModulesFromFile(String xmlFile) throws LoadModulesException
 	{
 		try
 		{
 			config = new XMLConfiguration(xmlFile);
-			
+
 			setGlobalConfiguration();
-			
+
 			constructModules();
-			
+
 		} catch (ConfigurationException e)
 		{
 			throw new LoadModulesException("Configuration contains errors: " + e.getMessage(), e);
@@ -130,14 +131,14 @@ public class Moduli
 			throw new LoadModulesException("An argument isn't valid : " + e.getMessage(), e);
 		}
 	}
-	
-	
+
+
 	private void setGlobalConfiguration()
 	{
 		globalConfiguration = getModuleConfig("globalConfiguration");
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	private void constructModules() throws ClassNotFoundException, LoadModulesException
 	{
@@ -145,19 +146,19 @@ public class Moduli
 		{
 			Class<? extends AModule> id = (Class<? extends AModule>) Class
 					.forName(config.getString(moduleMessage(i, "[@id]")));
-			
+
 			Class<? extends AModule> clazz = getImplementation(i, id);
-			
+
 			SubnodeConfiguration moduleConfig = getModuleConfig(moduleMessage(i, ".properties"));
-			
+
 			AModule module = (AModule) createObject(clazz);
-			
+
 			module.setSubnodeConfiguration(moduleConfig);
-			
+
 			module.setId(id);
-			
+
 			checkModuleIsUnique(module);
-			
+
 			// --- set dependency-list ---
 			String[] rawDependencyList = config.getStringArray(moduleMessage(i, ".dependency"));
 			List<Class<? extends AModule>> dependencyList = new ArrayList<>();
@@ -166,15 +167,15 @@ public class Moduli
 				dependencyList.add((Class<? extends AModule>) Class.forName(dependency));
 			}
 			module.setDependencies(dependencyList);
-			
-			
+
+
 			modules.put(id, module);
-			
+
 			log.trace("Module created: " + module);
 		}
 	}
-	
-	
+
+
 	@SuppressWarnings("unchecked")
 	private Class<? extends AModule> getImplementation(final int i, final Class<? extends AModule> id)
 			throws ClassNotFoundException
@@ -186,8 +187,8 @@ public class Moduli
 		}
 		return id;
 	}
-	
-	
+
+
 	private SubnodeConfiguration getModuleConfig(final String key)
 	{
 		try
@@ -198,8 +199,8 @@ public class Moduli
 			return new SubnodeConfiguration(new HierarchicalConfiguration(), new DefaultConfigurationNode());
 		}
 	}
-	
-	
+
+
 	private void checkModuleIsUnique(final AModule module) throws LoadModulesException
 	{
 		if (modules.containsKey(module.getId()))
@@ -207,8 +208,8 @@ public class Moduli
 			throw new LoadModulesException("module-id '" + module.getId() + "' isn't unique.");
 		}
 	}
-	
-	
+
+
 	/**
 	 * Load modules and catch exceptions
 	 *
@@ -226,25 +227,23 @@ public class Moduli
 					+ "') ", e);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Starts all modules in modulesList.
 	 *
 	 * @throws InitModuleException if the initialization of a module fails
 	 * @throws StartModuleException if the start of a module fails
 	 */
-	@SuppressWarnings("unchecked")
 	public void startModules() throws InitModuleException, StartModuleException
 	{
-		
 		initModules(orderedModules);
 		startUpModules(orderedModules);
-		
+
 		modulesState.set(ModulesState.ACTIVE);
 	}
-	
-	
+
+
 	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws DependencyException
 	{
 		try
@@ -271,8 +270,8 @@ public class Moduli
 			throw new DependencyException("Cycle in dependencies: ", e);
 		}
 	}
-	
-	
+
+
 	private void initModules(List<AModule> orderedModules) throws InitModuleException
 	{
 		for (AModule m : orderedModules)
@@ -288,8 +287,8 @@ public class Moduli
 			}
 		}
 	}
-	
-	
+
+
 	private void startUpModules(List<AModule> orderedModules) throws StartModuleException
 	{
 		for (AModule m : orderedModules)
@@ -309,8 +308,8 @@ public class Moduli
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Stops all modules in modulesList.
 	 */
@@ -318,15 +317,15 @@ public class Moduli
 	{
 		List<AModule> reversedModules = new ArrayList<>(orderedModules);
 		Collections.reverse(reversedModules);
-		
+
 		internalStopModules(reversedModules);
-		
+
 		deinitModules(reversedModules);
-		
+
 		modulesState.set(ModulesState.RESOLVED);
 	}
-	
-	
+
+
 	private void internalStopModules(final List<AModule> reversedModules)
 	{
 		for (AModule m : reversedModules)
@@ -345,8 +344,8 @@ public class Moduli
 			}
 		}
 	}
-	
-	
+
+
 	private void deinitModules(final List<AModule> reversedModules)
 	{
 		for (AModule m : reversedModules)
@@ -361,8 +360,8 @@ public class Moduli
 			}
 		}
 	}
-	
-	
+
+
 	/**
 	 * Returns a list with all loaded modules.
 	 *
@@ -372,8 +371,8 @@ public class Moduli
 	{
 		return new ArrayList<>(modules.values());
 	}
-	
-	
+
+
 	/**
 	 * Gets a module from current module-list.
 	 *
@@ -381,14 +380,13 @@ public class Moduli
 	 * @return the instance of the module for the id
 	 * @throws ModuleNotFoundException if the module couldn't be found
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends AModule> T getModule(Class<T> moduleId)
 	{
 		return getModuleOpt(moduleId)
 				.orElseThrow(() -> new ModuleNotFoundException(moduleMessage(moduleId, "not found")));
 	}
-	
-	
+
+
 	/**
 	 * Gets a module from current module-list.
 	 *
@@ -408,11 +406,11 @@ public class Moduli
 				.map(a -> (T) a)
 				.findFirst();
 	}
-	
-	
+
+
 	/**
 	 * Check whether a module is loaded.
-	 * 
+	 *
 	 * @param moduleId the Class of the module
 	 * @return if the module is loaded
 	 */
@@ -421,11 +419,11 @@ public class Moduli
 		return modules.containsKey(moduleId)
 				|| modules.values().stream().map(Object::getClass).anyMatch(c -> c.equals(moduleId));
 	}
-	
-	
+
+
 	/**
 	 * Creates an object from a clazz.
-	 * 
+	 *
 	 * @param clazz
 	 */
 	private Object createObject(final Class<? extends AModule> clazz)
@@ -441,14 +439,14 @@ public class Moduli
 			throw new IllegalArgumentException("Error constructing module", e);
 		}
 	}
-	
-	
+
+
 	private String moduleMessage(Object module, String message)
 	{
 		return "Module " + module + " " + message;
 	}
-	
-	
+
+
 	private String moduleMessage(int moduleNumber, String property)
 	{
 		return "module(" + moduleNumber + ")" + property;

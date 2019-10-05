@@ -14,11 +14,9 @@ package edu.tigers.moduli.exceptions;
  */
 public class DependencyException extends Exception
 {
-	
-	/**  */
 	private static final long serialVersionUID = -688270423190284593L;
-	
-	
+
+
 	/**
 	 * @param msg of the exception
 	 */
@@ -26,12 +24,8 @@ public class DependencyException extends Exception
 	{
 		super(msg);
 	}
-	
-	
-	/**
-	 * @param message
-	 * @param cause
-	 */
+
+
 	public DependencyException(final String message, final Throwable cause)
 	{
 		super(message, cause);

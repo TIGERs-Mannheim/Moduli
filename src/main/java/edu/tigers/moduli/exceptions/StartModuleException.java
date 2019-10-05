@@ -14,11 +14,9 @@ package edu.tigers.moduli.exceptions;
  */
 public class StartModuleException extends Exception
 {
-	
-	/**  */
 	private static final long serialVersionUID = 6921416409169961088L;
-	
-	
+
+
 	/**
 	 * @param msg of the exception
 	 * @param cause of the exception
