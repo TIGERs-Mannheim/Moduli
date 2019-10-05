@@ -14,11 +14,9 @@ package edu.tigers.moduli.exceptions;
  */
 public class ModuleNotFoundException extends RuntimeException
 {
-	
-	/**  */
 	private static final long serialVersionUID = -3273863493959166184L;
-	
-	
+
+
 	/**
 	 * @param msg of the exception
 	 */

@@ -4,9 +4,9 @@
     <option name="selectedGlobalProfile">
       <Settings>
         <option name="formatter" value="ECLIPSE" />
-        <option name="id" value="1480100693696" />
-        <option name="importOrderConfigFilePath" value="$PROJECT_DIR$/coding/Sumatra.importorder"/>
-        <option name="importOrderFromFile" value="true"/>
+        <option name="id" value="1474474120699" />
+        <option name="importOrderConfigFilePath" value="$PROJECT_DIR$/../Sumatra/coding/Sumatra.importorder" />
+        <option name="importOrderFromFile" value="true" />
         <option name="name" value="default" />
         <option name="pathToConfigFileJava" value="$PROJECT_DIR$/../Sumatra/coding/TigersFormatterProfile.xml" />
         <option name="selectedJavaProfile" value="TIGERs" />

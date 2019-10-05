@@ -14,11 +14,9 @@ package edu.tigers.moduli.exceptions;
  */
 public class LoadModulesException extends Exception
 {
-	
-	/**  */
 	private static final long serialVersionUID = -5850251277618067045L;
-	
-	
+
+
 	/**
 	 * @param msg of the exception
 	 * @param cause of the exception
@@ -27,8 +25,8 @@ public class LoadModulesException extends Exception
 	{
 		super(msg, cause);
 	}
-	
-	
+
+
 	/**
 	 * @param msg of the exception
 	 */
