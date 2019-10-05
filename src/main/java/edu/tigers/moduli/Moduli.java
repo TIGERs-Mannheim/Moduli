@@ -19,7 +19,8 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.DefaultConfigurationNode;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
 import org.jgrapht.graph.DefaultEdge;
@@ -40,7 +41,7 @@ import edu.tigers.moduli.listenerVariables.ModulesStateVariable;
  */
 public class Moduli
 {
-	private static final Logger log = Logger.getLogger(Moduli.class.getName());
+	private static final Logger log = LogManager.getLogger(Moduli.class.getName());
 	private final Map<Class<? extends AModule>, AModule> modules = new HashMap<>();
 	private List<AModule> orderedModules = new LinkedList<>();
 	private SubnodeConfiguration globalConfiguration;
