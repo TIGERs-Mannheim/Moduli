@@ -21,9 +21,9 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.configuration.tree.DefaultConfigurationNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedAcyclicGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import edu.tigers.moduli.exceptions.DependencyException;
@@ -97,7 +97,7 @@ public class Moduli
 		modulesState.set(ModulesState.NOT_LOADED);
 		loadModulesFromFile(xmlFile);
 
-		DirectedGraph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
+		Graph<AModule, DefaultEdge> dependencyGraph = buildDependencyGraph();
 		new TopologicalOrderIterator<>(dependencyGraph).forEachRemaining(m -> orderedModules.add(0, m));
 
 		modulesState.set(ModulesState.RESOLVED);
@@ -244,7 +244,7 @@ public class Moduli
 	}
 
 
-	private DirectedGraph<AModule, DefaultEdge> buildDependencyGraph() throws DependencyException
+	private Graph<AModule, DefaultEdge> buildDependencyGraph() throws DependencyException
 	{
 		try
 		{
